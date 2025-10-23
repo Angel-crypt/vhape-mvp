@@ -17,16 +17,63 @@ Vhape provides a minimalistic framework to **validate REST API authentication an
 - **Multiple Scenarios Support:** Test several authentication cases in a single file.
 - **Clear Reporting:** Get understandable feedback about API security.
 - **Modular & Extensible:** Parser, steps, and features are organized for future growth.
-
 ---
+
 
 ## Quick Start
 
+
 Clone the repository:
+
 
 ```bash
 git clone https://github.com/Angel-crypt/vhape-mvp.git
 ```
-<!-- Further installation instructions (virtual environment, dependencies, and execution) will be added as the project evolves -->
 
-<!-- Placeholder for usage screenshot -->
+
+### Create a Virtual Environment
+
+
+It is recommended to use a **virtual environment** to isolate dependencies:
+
+
+```bash
+# Navigate to project folder
+cd vhape-mvp
+
+
+# Create a virtual environment (Linux/macOS)
+python3 -m venv venv
+
+
+# On Windows
+python -m venv venv
+
+
+# Activate the virtual environment (Linux/macOS)
+source venv/bin/activate
+
+
+# Activate the virtual environment (Windows)
+venv\Scripts\activate
+```
+
+
+### Install MVP Dependencies
+
+
+```bash
+# Install main dependencies for MVP
+pip install -r requirements.txt
+```
+
+
+### (Optional) Install Development Dependencies
+
+
+For testing, code style, and coverage, you can install the development packages:
+
+
+```bash
+pip install -r requirements-dev.txt
+```
