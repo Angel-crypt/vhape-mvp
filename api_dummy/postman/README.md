@@ -1,187 +1,161 @@
-# Postman Collection for Vhape Dummy API
+# Colección Postman para Vhape Dummy API
 
-Complete Postman collection and environment for testing all authentication scenarios of the Vhape Dummy API.
+Colección completa de Postman y environment para probar todos los escenarios de autenticación del API dummy de Vhape.
 
-## Files
+## Archivos
 
-- **Vhape_Dummy_API.postman_collection.json** - Complete test collection with all endpoints
-- **Vhape_Dummy_API.postman_environment.json** - Environment variables with tokens and base URL
+- **Vhape_Dummy_API.postman_collection.json** - Colección de pruebas completa con todos los endpoints
+- **Vhape_Dummy_API.postman_environment.json** - Variables de environment con tokens y URL base
 
-## Import Instructions
+## Instrucciones de Importación
 
-### Step 1: Import Collection
+### Paso 1: Importar Colección
 
-1. Open Postman
-2. Click **Import** button (top left)
-3. Click **Upload Files**
-4. Select `Vhape_Dummy_API.postman_collection.json`
-5. Click **Import**
+1. Abrir Postman
+2. Clic en botón **Import** (arriba a la izquierda)
+3. Clic en **Upload Files**
+4. Seleccionar `Vhape_Dummy_API.postman_collection.json`
+5. Clic en **Import**
 
-### Step 2: Import Environment
+### Paso 2: Importar Environment
 
-1. Click **Import** button again
-2. Click **Upload Files**
-3. Select `Vhape_Dummy_API.postman_environment.json`
-4. Click **Import**
+1. Clic en botón **Import** nuevamente
+2. Clic en **Upload Files**
+3. Seleccionar `Vhape_Dummy_API.postman_environment.json`
+4. Clic en **Import**
 
-### Step 3: Select Environment
+### Paso 3: Seleccionar Environment
 
-1. In the top right corner, click the environment dropdown
-2. Select **"Vhape Dummy API - Local"**
+1. En la esquina superior derecha, clic en el dropdown de environment
+2. Seleccionar **"Vhape Dummy API - Local"**
 
-## Collection Structure
+## Estructura de la Colección
 
-The collection is organized into 7 folders:
+La colección está organizada en 4 carpetas:
 
-### 1. Public Endpoints
-- `GET /` - Root endpoint
-- `GET /health` - Health check
-- `GET /public` - Public access endpoint
+### 1. Health Check
+- `GET /health` - Verificar que el servidor funciona
 
-**Expected:** All return `200 OK` without authentication
+**Esperado:** Retorna `200 OK` sin autenticación
 
-### 2. Protected Endpoints - Valid Token
-- `GET /protected` (with admin token)
-- `GET /secure-data` (with user token)
+### 2. Validate Token
+- `GET /validate-token` (con token válido) → `200`
+- `GET /validate-token` (con token inválido) → `401`
+- `GET /validate-token` (sin token) → `401`
 
-**Expected:** All return `200 OK` with user information
+**Esperado:** Retorna `200 OK` con token válido, `401 Unauthorized` con token inválido o sin token
 
-### 3. Protected Endpoints - Invalid Token
-- `GET /protected` (with invalid token) → `401`
-- `GET /protected` (with expired token) → `401`
-- `GET /protected` (with malformed token) → `401`
+### 3. Expect 401
+- `GET /expect-401` (sin token) → `401`
+- `GET /expect-401` (con token inválido) → `401`
 
-**Expected:** All return `401 Unauthorized`
+**Esperado:** Todos retornan `401 Unauthorized`
 
-### 4. Protected Endpoints - Missing Token
-- `GET /protected` (no token) → `401`
-- `GET /secure-data` (no token) → `401`
+### 4. Access Denied
+- `GET /access-denied` (con token usuario) → `403`
+- `GET /access-denied` (con token admin) → `200`
 
-**Expected:** All return `401 Unauthorized`
+**Esperado:** Retorna `403 Forbidden` con token de usuario, `200 OK` con token admin
 
-### 5. Admin Endpoints - Valid Admin Token
-- `GET /admin-only` (with admin token) → `200`
-- `GET /admin/users` (with admin token) → `200`
+## Variables de Environment
 
-**Expected:** All return `200 OK` with admin access
-
-### 6. Admin Endpoints - Non-Admin Token (Access Denied)
-- `GET /admin-only` (with user token) → `403`
-- `GET /admin/users` (with user token) → `403`
-
-**Expected:** All return `403 Forbidden` (Access Denied)
-
-### 7. Test Scenario Endpoints - DSL Keywords
-- `GET /test/validate-token` (valid token) → `200`
-- `GET /test/expect-401` (invalid token) → `401`
-- `GET /test/expect-401` (no token) → `401`
-- `GET /test/access-denied` (non-admin token) → `403`
-- `GET /test/missing-token` (no token) → `401`
-
-**Expected:** Responses match DSL keyword expectations
-
-## Environment Variables
-
-| Variable | Value | Description |
+| Variable | Valor | Descripción |
 |----------|-------|-------------|
-| `base_url` | `http://localhost:8000` | API base URL |
-| `valid_token_admin` | `valid-token-123` | Admin user token |
-| `valid_token_user` | `valid-token-456` | Regular user token |
-| `admin_token` | `admin-token` | Admin token |
-| `invalid_token` | `invalid-token` | Invalid token for testing |
-| `expired_token` | `expired-token` | Expired token for testing |
-| `malformed_token` | `malformed-token` | Malformed token for testing |
+| `base_url` | `http://localhost:8000` | URL base del API |
+| `valid_token` | `valid-token` | Token de usuario admin |
+| `user_token` | `user-token` | Token de usuario regular |
+| `invalid_token` | `invalid-token` | Token inválido para pruebas |
+| `expired_token` | `expired-token` | Token expirado para pruebas |
 
-## Running Tests
+## Ejecutar Pruebas
 
-### Run Individual Request
+### Ejecutar Request Individual
 
-1. Select a request from the collection
-2. Click **Send**
-3. Check the **Test Results** tab for validation results
+1. Seleccionar un request de la colección
+2. Clic en **Send**
+3. Revisar la pestaña **Test Results** para ver los resultados de validación
 
-### Run Entire Collection
+### Ejecutar Colección Completa
 
-1. Right-click on the collection name
-2. Select **Run collection**
-3. Click **Run Vhape Dummy API - Complete Test Suite**
-4. Review test results for all requests
+1. Clic derecho en el nombre de la colección
+2. Seleccionar **Run collection**
+3. Clic en **Run Vhape Dummy API - Suite de Pruebas**
+4. Revisar resultados de todas las pruebas
 
-### Run with Collection Runner
+### Ejecutar con Collection Runner
 
-1. Click **Collections** in the sidebar
-2. Click **Run** next to the collection
-3. Select which requests to run
-4. Click **Run Vhape Dummy API**
-5. View results summary
+1. Clic en **Collections** en la barra lateral
+2. Clic en **Run** junto a la colección
+3. Seleccionar qué requests ejecutar
+4. Clic en **Run Vhape Dummy API**
+5. Ver resumen de resultados
 
-## Test Scripts
+## Scripts de Prueba
 
-Each request includes automated test scripts that validate:
+Cada request incluye scripts automatizados que validan:
 
-- ✅ **Status codes** - Verifies correct HTTP status codes
-- ✅ **Response structure** - Checks for expected JSON properties
-- ✅ **Error messages** - Validates error detail messages
-- ✅ **Data validation** - Ensures response data matches expectations
+- ✅ **Códigos de estado** - Verifica códigos HTTP correctos
+- ✅ **Estructura de respuesta** - Verifica propiedades JSON esperadas
+- ✅ **Mensajes de error** - Valida mensajes de detalle de error
+- ✅ **Validación de datos** - Asegura que los datos de respuesta coincidan con las expectativas
 
-## DSL Keyword Testing
+## Prueba de DSL Keywords
 
-The collection includes specific endpoints for testing DSL keywords:
+La colección incluye endpoints específicos para probar DSL keywords:
 
 ### `validate token`
-- **Endpoint:** `GET /test/validate-token`
-- **Use:** Valid token in Authorization header
-- **Expected:** `200 OK` with validation status
+- **Endpoint:** `GET /validate-token`
+- **Uso:** Token válido en header Authorization
+- **Esperado:** `200 OK` con estado de validación
 
 ### `expect 401`
-- **Endpoint:** `GET /test/expect-401`
-- **Use:** Invalid token or no token
-- **Expected:** `401 Unauthorized`
+- **Endpoint:** `GET /expect-401`
+- **Uso:** Token inválido o sin token
+- **Esperado:** `401 Unauthorized`
 
 ### `access denied`
-- **Endpoint:** `GET /test/access-denied`
-- **Use:** Non-admin token on admin endpoint
-- **Expected:** `403 Forbidden`
+- **Endpoint:** `GET /access-denied`
+- **Uso:** Token de usuario en endpoint admin
+- **Esperado:** `403 Forbidden`
 
-## Status Code Reference
+## Referencia de Códigos de Estado
 
-| Status Code | Meaning | When It Occurs |
-|-------------|---------|----------------|
-| `200 OK` | Success | Valid token, authorized access |
-| `401 Unauthorized` | Authentication failed | Invalid/missing token |
-| `403 Forbidden` | Authorization failed | Valid token but insufficient permissions |
+| Código | Significado | Cuándo Ocurre |
+|--------|-------------|---------------|
+| `200 OK` | Éxito | Token válido, acceso autorizado |
+| `401 Unauthorized` | Autenticación fallida | Token inválido o faltante |
+| `403 Forbidden` | Autorización fallida | Token válido pero sin permisos suficientes |
 
-## Tips
+## Consejos
 
-1. **Check Environment**: Always ensure "Vhape Dummy API - Local" is selected
-2. **Server Running**: Make sure the API server is running on `http://localhost:8000`
-3. **View Test Results**: Click on any request and check the **Test Results** tab
-4. **Modify Variables**: Edit environment variables if you need different tokens or URLs
-5. **Export Results**: Use Postman's export feature to save test results
+1. **Verificar Environment**: Siempre asegurar que "Vhape Dummy API - Local" esté seleccionado
+2. **Servidor Corriendo**: Asegurar que el servidor API esté corriendo en `http://localhost:8000`
+3. **Ver Resultados**: Clic en cualquier request y revisar la pestaña **Test Results**
+4. **Modificar Variables**: Editar variables de environment si necesitas diferentes tokens o URLs
+5. **Exportar Resultados**: Usar la función de exportar de Postman para guardar resultados de pruebas
 
-## Troubleshooting
+## Solución de Problemas
 
-### Collection won't import
-- Ensure you're using Postman v9.0 or later
-- Check that JSON files are valid
+### La colección no se importa
+- Asegurar que estás usando Postman v9.0 o posterior
+- Verificar que los archivos JSON sean válidos
 
-### Tests failing
-- Verify the API server is running: `./api_dummy/run.sh`
-- Check that the environment is selected
-- Verify `base_url` points to the correct server
+### Las pruebas fallan
+- Verificar que el servidor API esté corriendo: `./api_dummy/run.sh`
+- Verificar que el environment esté seleccionado
+- Verificar que `base_url` apunte al servidor correcto
 
-### Variables not working
-- Ensure environment is selected in the dropdown
-- Check that variable names match exactly (case-sensitive)
-- Verify variables are enabled in the environment
+### Las variables no funcionan
+- Asegurar que el environment esté seleccionado en el dropdown
+- Verificar que los nombres de variables coincidan exactamente (sensible a mayúsculas)
+- Verificar que las variables estén habilitadas en el environment
 
-## Next Steps
+## Próximos Pasos
 
-After importing and running the collection:
+Después de importar y ejecutar la colección:
 
-1. ✅ Verify all tests pass
-2. ✅ Review response structures
-3. ✅ Test edge cases manually
-4. ✅ Export results for documentation
-5. ✅ Share collection with team members
-
+1. ✅ Verificar que todas las pruebas pasen
+2. ✅ Revisar estructuras de respuesta
+3. ✅ Probar casos límite manualmente
+4. ✅ Exportar resultados para documentación
+5. ✅ Compartir colección con miembros del equipo

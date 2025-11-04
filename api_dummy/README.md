@@ -1,245 +1,214 @@
 # Vhape Dummy API - HU2
 
-A FastAPI-based dummy API server for testing authentication and authorization scenarios in the Vhape BDD framework.
+API dummy simple para probar los DSL keywords del framework Vhape BDD.
 
-## Purpose
+## Propósito
 
-This dummy API provides a controlled environment for testing DSL keywords such as:
+API minimalista que permite probar los DSL keywords:
+- `validate token` - Validar token de autenticación
+- `expect 401` - Esperar respuesta 401 (no autorizado)
+- `access denied` - Esperar respuesta 403 (acceso denegado)
 
-- `validate token` - Test token validation
-- `expect 401` - Test unauthorized access scenarios
-- `access denied` - Test forbidden access scenarios (403)
+## Características
 
-## Features
+- **3 endpoints esenciales** para probar los DSL keywords
+- **Documentación automática** en `/docs` (FastAPI)
+- **Tokens simples** para testing
 
-- **Multiple Authentication Scenarios**: Valid tokens, invalid tokens, missing tokens
-- **Role-Based Access Control**: Admin and regular user roles
-- **FastAPI Auto-Documentation**: Interactive API docs at `/docs`
-- **Test Endpoints**: Specific endpoints for testing DSL keywords
+## Ejecutar el API
 
-## Running the API
-
-### Quick Start (Recommended)
-
-**Step 1:** Navigate to the project root
+### Prerrequisitos
 
 ```bash
-cd /home/angel/PycharmProjects/vhape-mvp
-```
-
-**Step 2:** Activate the virtual environment
-
-```bash
+# Activar entorno virtual
 source .venv/bin/activate
-```
 
-**Step 3:** Install dependencies (if not already installed)
-
-```bash
+# Instalar dependencias (si no están instaladas)
 pip install -r requirements.txt
 ```
 
-**Step 4:** Run the server using one of the methods below
-
----
-
-### Method 1: Using the Bash Script (Easiest)
-
-The bash script automatically activates the virtual environment and starts the server:
+### Método 1: Script Bash (Recomendado)
 
 ```bash
-# From project root
 ./api_dummy/run.sh
 ```
 
-**What it does:**
-
-- Automatically detects and activates `.venv` or `venv`
-- Uses `python -m uvicorn` (works even if uvicorn is not in PATH)
-- Starts the server with auto-reload enabled
-
-**Expected output:**
-
-```
-Starting Vhape Dummy API...
-FastAPI docs will be available at: http://localhost:8000/docs
-Press Ctrl+C to stop the server
-
-Activating virtual environment...
-Starting server...
-INFO:     Will watch for changes in these directories: ['/home/angel/PycharmProjects/vhape-mvp']
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [XXXXX] using StatReload
-INFO:     Started server process [XXXXX]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-```
-
----
-
-### Method 2: Using the Python Runner
+### Método 2: Python
 
 ```bash
-# From project root (with venv activated)
 python api_dummy/run.py
 ```
 
-Or make it executable:
+### Método 3: Uvicorn directo
 
 ```bash
-chmod +x api_dummy/run.py
-./api_dummy/run.py
-```
-
----
-
-### Method 3: Manual Uvicorn Command
-
-**With virtual environment activated:**
-
-```bash
-# From project root
 python -m uvicorn api_dummy.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Or if uvicorn is in your PATH:
+## Endpoints
 
-```bash
-uvicorn api_dummy.main:app --reload --host 0.0.0.0 --port 8000
-```
-
----
-
-### Method 4: Direct Python Module Execution
-
-```bash
-# From project root (with venv activated)
-python -m api_dummy.main
-```
-
----
-
-### Troubleshooting
-
-**If you get "uvicorn: command not found":**
-
-- Make sure the virtual environment is activated: `source .venv/bin/activate`
-- Use `python -m uvicorn` instead of `uvicorn`
-- Or use the bash script: `./api_dummy/run.sh` (it handles this automatically)
-
-**If you get "ModuleNotFoundError: No module named 'fastapi'":**
-
-- Activate virtual environment: `source .venv/bin/activate`
-- Install dependencies: `pip install -r requirements.txt`
-
-**If port 8000 is already in use:**
-
-- Change the port in the command: `--port 8001`
-- Or stop the process using port 8000
-
-## Accessing the API
-
-Once the server is running, you'll see output like:
+### Health Check
 
 ```
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+GET /health
 ```
 
-**Access the API at:**
+Endpoint público para verificar que el servidor está funcionando.
 
-- **API Base URL**: <http://localhost:8000>
-- **Swagger UI (Interactive Docs)**: <http://localhost:8000/docs> ⭐ **Recommended for testing**
-- **ReDoc (Alternative Docs)**: <http://localhost:8000/redoc>
-- **Health Check**: <http://localhost:8000/health>
-- **OpenAPI JSON**: <http://localhost:8000/openapi.json>
+**Respuesta:** `200 OK`
+```json
+{"status": "healthy"}
+```
 
-**To stop the server:** Press `Ctrl+C` in the terminal where it's running.
-
-## Authentication
-
-The API uses Bearer token authentication via the `Authorization` header:
+### Validate Token
 
 ```
+GET /validate-token
 Authorization: Bearer <token>
 ```
 
-### Valid Tokens
+**DSL keyword:** `validate token`
 
-- `valid-token-123` - Admin user
-- `valid-token-456` - Regular user
-- `admin-token` - Admin user
+- **Token válido:** `valid-token` → `200 OK`
+- **Token inválido:** `invalid-token` → `401 Unauthorized`
+- **Sin token:** → `401 Unauthorized`
 
-### Invalid Tokens (for testing)
-
-- `invalid-token` - Returns 401
-- `expired-token` - Returns 401 with "Token has expired"
-- `malformed-token` - Returns 401 with "Malformed token format"
-
-## Endpoints
-
-### Public Endpoints
-
-- `GET /` - Root endpoint
-- `GET /health` - Health check
-- `GET /public` - Public access endpoint
-
-### Protected Endpoints
-
-- `GET /protected` - Requires valid token
-- `GET /secure-data` - Requires valid token
-- `GET /admin-only` - Requires admin role (403 for non-admin)
-- `GET /admin/users` - Requires admin role (403 for non-admin)
-
-### Test Scenarios Endpoints
-
-- `GET /test/validate-token` - Test token validation
-- `GET /test/expect-401` - Test 401 scenarios
-- `GET /test/access-denied` - Test 403 scenarios
-- `GET /test/missing-token` - Test missing token scenario
-
-## Testing Examples
-
-### Using curl
-
+**Ejemplo con token válido:**
 ```bash
-# Test with valid token
-curl -H "Authorization: Bearer valid-token-123" http://localhost:8000/protected
-
-# Test with invalid token (expect 401)
-curl -H "Authorization: Bearer invalid-token" http://localhost:8000/protected
-
-# Test without token (expect 401)
-curl http://localhost:8000/protected
-
-# Test admin endpoint with non-admin token (expect 403)
-curl -H "Authorization: Bearer valid-token-456" http://localhost:8000/admin-only
-
-# Test admin endpoint with admin token (expect 200)
-curl -H "Authorization: Bearer admin-token" http://localhost:8000/admin-only
+curl -H "Authorization: Bearer valid-token" http://localhost:8000/validate-token
 ```
 
-### Using FastAPI Docs
+**Respuesta:** `200 OK`
+```json
+{
+  "message": "Token validated",
+  "user_id": "user1"
+}
+```
 
-1. Navigate to <http://localhost:8000/docs>
-2. Click on any endpoint
-3. Click "Try it out"
-4. Add Authorization header: `Bearer valid-token-123`
-5. Click "Execute"
+### Expect 401
 
-## DSL Keyword Mapping
+```
+GET /expect-401
+Authorization: Bearer <token> (opcional)
+```
 
-| DSL Keyword | Endpoint | Test Case |
-|------------|----------|-----------|
-| `validate token` | `/test/validate-token` | Use valid token |
-| `expect 401` | `/test/expect-401` | Omit token or use invalid token |
-| `access denied` | `/test/access-denied` | Use non-admin token on admin endpoint |
+**DSL keyword:** `expect 401`
 
-## Status Codes
+- **Sin token:** → `401 Unauthorized`
+- **Token inválido:** `invalid-token` → `401 Unauthorized`
+- **Token válido:** `valid-token` → `200 OK` (pero el DSL espera 401)
 
-- `200 OK` - Request successful
-- `401 Unauthorized` - Missing or invalid token
-- `403 Forbidden` - Valid token but insufficient permissions
+**Ejemplo sin token:**
+```bash
+curl http://localhost:8000/expect-401
+```
 
-## Development
+**Respuesta:** `401 Unauthorized`
+```json
+{
+  "detail": "Missing authentication token"
+}
+```
 
-This API is part of the Vhape MVP project and is used internally for BDD testing. It is not intended for production use.
+### Access Denied
+
+```
+GET /access-denied
+Authorization: Bearer <token>
+```
+
+**DSL keyword:** `access denied`
+
+- **Token admin:** `valid-token` → `200 OK`
+- **Token usuario:** `user-token` → `403 Forbidden`
+- **Sin token:** → `401 Unauthorized`
+
+**Ejemplo con token de usuario (espera 403):**
+```bash
+curl -H "Authorization: Bearer user-token" http://localhost:8000/access-denied
+```
+
+**Respuesta:** `403 Forbidden`
+```json
+{
+  "detail": "Access denied"
+}
+```
+
+## Tokens para Testing
+
+### Tokens Válidos
+
+| Token | Rol | Uso |
+|-------|-----|-----|
+| `valid-token` | admin | Probar acceso admin (200) |
+| `user-token` | user | Probar acceso denegado (403) |
+
+### Tokens Inválidos
+
+| Token | Resultado |
+|-------|-----------|
+| `invalid-token` | 401 Unauthorized |
+| `expired-token` | 401 Unauthorized |
+| (sin token) | 401 Unauthorized |
+
+## Ejemplos de Uso
+
+### Probar "validate token"
+
+```bash
+# Token válido (debe retornar 200)
+curl -H "Authorization: Bearer valid-token" http://localhost:8000/validate-token
+
+# Token inválido (debe retornar 401)
+curl -H "Authorization: Bearer invalid-token" http://localhost:8000/validate-token
+
+# Sin token (debe retornar 401)
+curl http://localhost:8000/validate-token
+```
+
+### Probar "expect 401"
+
+```bash
+# Sin token (debe retornar 401)
+curl http://localhost:8000/expect-401
+
+# Token inválido (debe retornar 401)
+curl -H "Authorization: Bearer invalid-token" http://localhost:8000/expect-401
+```
+
+### Probar "access denied"
+
+```bash
+# Token de usuario en endpoint admin (debe retornar 403)
+curl -H "Authorization: Bearer user-token" http://localhost:8000/access-denied
+
+# Token admin (debe retornar 200)
+curl -H "Authorization: Bearer valid-token" http://localhost:8000/access-denied
+```
+
+## Documentación Interactiva
+
+Una vez que el servidor esté corriendo:
+
+- **Swagger UI:** http://localhost:8000/docs
+- **ReDoc:** http://localhost:8000/redoc
+
+## Mapeo DSL Keywords
+
+| DSL Keyword | Endpoint | Caso de Prueba |
+|------------|----------|----------------|
+| `validate token` | `/validate-token` | Token válido → 200 |
+| `expect 401` | `/expect-401` | Sin token o token inválido → 401 |
+| `access denied` | `/access-denied` | Token usuario en endpoint admin → 403 |
+
+## Códigos de Estado
+
+- `200 OK` - Token válido y acceso autorizado
+- `401 Unauthorized` - Token inválido o faltante
+- `403 Forbidden` - Token válido pero sin permisos
+
+## Desarrollo
+
+Este API es parte del proyecto Vhape MVP y se usa internamente para pruebas BDD. No está diseñado para uso en producción.
