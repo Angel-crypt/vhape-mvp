@@ -1,27 +1,17 @@
 {
 	"info": {
-		"_postman_id": "vhape-dummy-api-collection",
+		"_postman_id": "a23fbe25-8724-49da-bd17-77a1faa4fa7e",
 		"name": "Vhape Dummy API - Suite de Pruebas",
-		"description": "Colección simplificada para probar los DSL keywords del API dummy de Vhape:\n- validate token\n- expect 401\n- access denied",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"description": "Colección simplificada para probar los DSL keywords del API dummy de Vhape:\n- validate token (también prueba expect 401 con token inválido/sin token)\n- access denied",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42702550"
 	},
 	"item": [
 		{
 			"name": "1. Health Check",
 			"item": [
 				{
-					"name": "Health - GET /health",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/health",
-							"host": ["{{base_url}}"],
-							"path": ["health"]
-						},
-						"description": "Endpoint público para verificar que el servidor está funcionando"
-					},
-					"response": [],
+					"name": "Health - GET /api/health",
 					"event": [
 						{
 							"listen": "test",
@@ -39,16 +29,46 @@
 								"type": "text/javascript"
 							}
 						}
-					]
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": ["{{base_url}}"],
+							"path": ["api", "health"]
+						},
+						"description": "Endpoint público para verificar que el servidor está funcionando"
+					},
+					"response": []
 				}
 			],
 			"description": "Endpoint público sin autenticación"
 		},
 		{
-			"name": "2. Validate Token",
+			"name": "2. Users - Get Current User Profile",
 			"item": [
 				{
-					"name": "Validate Token - Token Válido",
+					"name": "Get My Profile - Token Válido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Código de estado es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Perfil de usuario obtenido\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('user_id');",
+									"    pm.expect(jsonData).to.have.property('role');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -59,52 +79,16 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/validate-token",
+							"raw": "{{base_url}}/api/users/me",
 							"host": ["{{base_url}}"],
-							"path": ["validate-token"]
+							"path": ["api", "users", "me"]
 						},
-						"description": "DSL keyword: validate token\nEndpoint para probar validación de token con token válido. Debe retornar 200."
+						"description": "DSL keyword: validate token\nObtener perfil del usuario actual con token válido. Retorna 200."
 					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Código de estado es 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Token validado correctamente\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('message');",
-									"    pm.expect(jsonData).to.have.property('user_id');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
+					"response": []
 				},
 				{
-					"name": "Validate Token - Token Inválido",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{invalid_token}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/validate-token",
-							"host": ["{{base_url}}"],
-							"path": ["validate-token"]
-						},
-						"description": "DSL keyword: validate token\nEndpoint para probar validación de token con token inválido. Debe retornar 401."
-					},
-					"response": [],
+					"name": "Get My Profile - Token Inválido",
 					"event": [
 						{
 							"listen": "test",
@@ -122,80 +106,7 @@
 								"type": "text/javascript"
 							}
 						}
-					]
-				},
-				{
-					"name": "Validate Token - Sin Token",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/validate-token",
-							"host": ["{{base_url}}"],
-							"path": ["validate-token"]
-						},
-						"description": "DSL keyword: validate token\nEndpoint para probar validación de token sin token. Debe retornar 401."
-					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Código de estado es 401\", function () {",
-									"    pm.response.to.have.status(401);",
-									"});",
-									"",
-									"pm.test(\"Respuesta indica token faltante\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.detail).to.include('Missing');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
-				}
-			],
-			"description": "DSL keyword: validate token\nEndpoints para probar validación de tokens (válidos, inválidos, faltantes)"
-		},
-		{
-			"name": "3. Expect 401",
-			"item": [
-				{
-					"name": "Expect 401 - Sin Token",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/expect-401",
-							"host": ["{{base_url}}"],
-							"path": ["expect-401"]
-						},
-						"description": "DSL keyword: expect 401\nEndpoint para probar escenario sin token. Debe retornar 401."
-					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Código de estado es 401\", function () {",
-									"    pm.response.to.have.status(401);",
-									"});",
-									"",
-									"pm.test(\"Respuesta indica token faltante\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.detail).to.include('Missing');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
-				},
-				{
-					"name": "Expect 401 - Token Inválido",
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -206,13 +117,16 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/expect-401",
+							"raw": "{{base_url}}/api/users/me",
 							"host": ["{{base_url}}"],
-							"path": ["expect-401"]
+							"path": ["api", "users", "me"]
 						},
-						"description": "DSL keyword: expect 401\nEndpoint para probar escenario con token inválido. Debe retornar 401."
+						"description": "DSL keywords: validate token / expect 401\nObtener perfil con token inválido. Retorna 401, también prueba el DSL keyword 'expect 401'."
 					},
-					"response": [],
+					"response": []
+				},
+				{
+					"name": "Get My Profile - Sin Token",
 					"event": [
 						{
 							"listen": "test",
@@ -222,41 +136,35 @@
 									"    pm.response.to.have.status(401);",
 									"});",
 									"",
-									"pm.test(\"Respuesta indica token inválido\", function () {",
+									"pm.test(\"Respuesta indica token faltante\", function () {",
 									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('detail');",
+									"    pm.expect(jsonData.detail).to.include('Missing');",
 									"});"
 								],
 								"type": "text/javascript"
 							}
 						}
-					]
-				}
-			],
-			"description": "DSL keyword: expect 401\nEndpoints para probar escenarios que deben retornar 401 (no autorizado)"
-		},
-		{
-			"name": "4. Access Denied",
-			"item": [
-				{
-					"name": "Access Denied - Token Usuario",
+					],
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{user_token}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"url": {
-							"raw": "{{base_url}}/access-denied",
+							"raw": "{{base_url}}/api/users/me",
 							"host": ["{{base_url}}"],
-							"path": ["access-denied"]
+							"path": ["api", "users", "me"]
 						},
-						"description": "DSL keyword: access denied\nEndpoint para probar acceso denegado con token de usuario en endpoint admin. Debe retornar 403."
+						"description": "DSL keywords: validate token / expect 401\nObtener perfil sin token. Retorna 401, también prueba el DSL keyword 'expect 401'."
 					},
-					"response": [],
+					"response": []
+				}
+			],
+			"description": "DSL keywords: validate token / expect 401\nEndpoints para obtener perfil del usuario actual. Con token inválido o sin token retorna 401 (expect 401)."
+		},
+		{
+			"name": "3. Admin - Get All Users",
+			"item": [
+				{
+					"name": "Get All Users - Token Usuario (Access Denied)",
 					"event": [
 						{
 							"listen": "test",
@@ -274,10 +182,46 @@
 								"type": "text/javascript"
 							}
 						}
-					]
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "users"]
+						},
+						"description": "DSL keyword: access denied\nObtener lista de usuarios con token de usuario (sin permisos admin). Retorna 403."
+					},
+					"response": []
 				},
 				{
-					"name": "Access Denied - Token Admin",
+					"name": "Get All Users - Token Admin (Access Allowed)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Código de estado es 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Lista de usuarios obtenida\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('users');",
+									"    pm.expect(jsonData.users).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -288,34 +232,16 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/access-denied",
+							"raw": "{{base_url}}/api/admin/users",
 							"host": ["{{base_url}}"],
-							"path": ["access-denied"]
+							"path": ["api", "admin", "users"]
 						},
-						"description": "DSL keyword: access denied\nEndpoint para probar acceso admin con token admin. Debe retornar 200."
+						"description": "DSL keyword: access allowed\nObtener lista de usuarios con token admin. Retorna 200."
 					},
-					"response": [],
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Código de estado es 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Acceso concedido\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.message).to.include('granted');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					]
+					"response": []
 				}
 			],
-			"description": "DSL keyword: access denied\nEndpoints para probar acceso denegado (403) cuando un usuario sin permisos intenta acceder"
+			"description": "DSL keywords: access denied / access allowed\nEndpoint para obtener lista de usuarios (solo admin). Token usuario retorna 403 (access denied), token admin retorna 200 (access allowed)."
 		}
 	],
 	"event": [

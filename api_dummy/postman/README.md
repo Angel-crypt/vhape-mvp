@@ -31,31 +31,25 @@ Colección completa de Postman y environment para probar todos los escenarios de
 
 ## Estructura de la Colección
 
-La colección está organizada en 4 carpetas:
+La colección está organizada en 3 carpetas:
 
 ### 1. Health Check
-- `GET /health` - Verificar que el servidor funciona
+- `GET /api/health` - Verificar que el servidor funciona
 
 **Esperado:** Retorna `200 OK` sin autenticación
 
-### 2. Validate Token
-- `GET /validate-token` (con token válido) → `200`
-- `GET /validate-token` (con token inválido) → `401`
-- `GET /validate-token` (sin token) → `401`
+### 2. Users - Get Current User Profile
+- `GET /api/users/me` (con token válido) → `200` (validate token)
+- `GET /api/users/me` (con token inválido) → `401` (expect 401)
+- `GET /api/users/me` (sin token) → `401` (expect 401)
 
-**Esperado:** Retorna `200 OK` con token válido, `401 Unauthorized` con token inválido o sin token
+**Esperado:** Retorna `200 OK` con token válido (validate token), `401 Unauthorized` con token inválido o sin token (expect 401)
 
-### 3. Expect 401
-- `GET /expect-401` (sin token) → `401`
-- `GET /expect-401` (con token inválido) → `401`
+### 3. Admin - Get All Users
+- `GET /api/admin/users` (con token usuario) → `403` (access denied)
+- `GET /api/admin/users` (con token admin) → `200` (access allowed)
 
-**Esperado:** Todos retornan `401 Unauthorized`
-
-### 4. Access Denied
-- `GET /access-denied` (con token usuario) → `403`
-- `GET /access-denied` (con token admin) → `200`
-
-**Esperado:** Retorna `403 Forbidden` con token de usuario, `200 OK` con token admin
+**Esperado:** Retorna `403 Forbidden` con token de usuario (access denied), `200 OK` con token admin (access allowed)
 
 ## Variables de Environment
 
@@ -104,19 +98,24 @@ Cada request incluye scripts automatizados que validan:
 La colección incluye endpoints específicos para probar DSL keywords:
 
 ### `validate token`
-- **Endpoint:** `GET /validate-token`
+- **Endpoint:** `GET /api/users/me`
 - **Uso:** Token válido en header Authorization
-- **Esperado:** `200 OK` con estado de validación
+- **Esperado:** `200 OK` con perfil de usuario
 
 ### `expect 401`
-- **Endpoint:** `GET /expect-401`
-- **Uso:** Token inválido o sin token
+- **Endpoint:** `GET /api/users/me`
+- **Uso:** Sin token o con token inválido
 - **Esperado:** `401 Unauthorized`
 
 ### `access denied`
-- **Endpoint:** `GET /access-denied`
+- **Endpoint:** `GET /api/admin/users`
 - **Uso:** Token de usuario en endpoint admin
 - **Esperado:** `403 Forbidden`
+
+### `access allowed`
+- **Endpoint:** `GET /api/admin/users`
+- **Uso:** Token admin en endpoint admin
+- **Esperado:** `200 OK`
 
 ## Referencia de Códigos de Estado
 

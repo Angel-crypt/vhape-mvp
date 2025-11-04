@@ -6,7 +6,7 @@ API dummy simple para probar los DSL keywords del framework Vhape BDD.
 
 API minimalista que permite probar los DSL keywords:
 - `validate token` - Validar token de autenticación
-- `expect 401` - Esperar respuesta 401 (no autorizado)
+- `expect 401` - Esperar respuesta 401 (probar con `/validate-token` sin token o token inválido)
 - `access denied` - Esperar respuesta 403 (acceso denegado)
 
 ## Características
@@ -50,7 +50,7 @@ python -m uvicorn api_dummy.main:app --reload --host 0.0.0.0 --port 8000
 ### Health Check
 
 ```
-GET /health
+GET /api/health
 ```
 
 Endpoint público para verificar que el servidor está funcionando.
@@ -60,79 +60,72 @@ Endpoint público para verificar que el servidor está funcionando.
 {"status": "healthy"}
 ```
 
-### Validate Token
+### Get Current User Profile
 
 ```
-GET /validate-token
+GET /api/users/me
 Authorization: Bearer <token>
 ```
 
-**DSL keyword:** `validate token`
+**DSL keywords:** `validate token` / `expect 401`
 
-- **Token válido:** `valid-token` → `200 OK`
-- **Token inválido:** `invalid-token` → `401 Unauthorized`
-- **Sin token:** → `401 Unauthorized`
+- **Token válido:** `valid-token` → `200 OK` (validate token)
+- **Token inválido:** `invalid-token` → `401 Unauthorized` (expect 401)
+- **Sin token:** → `401 Unauthorized` (expect 401)
 
 **Ejemplo con token válido:**
 ```bash
-curl -H "Authorization: Bearer valid-token" http://localhost:8000/validate-token
+curl -H "Authorization: Bearer valid-token" http://localhost:8000/api/users/me
 ```
 
 **Respuesta:** `200 OK`
 ```json
 {
-  "message": "Token validated",
-  "user_id": "user1"
+  "user_id": "user1",
+  "role": "admin",
+  "message": "User profile retrieved successfully"
 }
 ```
 
-### Expect 401
+### Get All Users (Admin Only)
 
 ```
-GET /expect-401
-Authorization: Bearer <token> (opcional)
-```
-
-**DSL keyword:** `expect 401`
-
-- **Sin token:** → `401 Unauthorized`
-- **Token inválido:** `invalid-token` → `401 Unauthorized`
-- **Token válido:** `valid-token` → `200 OK` (pero el DSL espera 401)
-
-**Ejemplo sin token:**
-```bash
-curl http://localhost:8000/expect-401
-```
-
-**Respuesta:** `401 Unauthorized`
-```json
-{
-  "detail": "Missing authentication token"
-}
-```
-
-### Access Denied
-
-```
-GET /access-denied
+GET /api/admin/users
 Authorization: Bearer <token>
 ```
 
 **DSL keyword:** `access denied`
 
-- **Token admin:** `valid-token` → `200 OK`
-- **Token usuario:** `user-token` → `403 Forbidden`
+- **Token admin:** `valid-token` → `200 OK` (access allowed)
+- **Token usuario:** `user-token` → `403 Forbidden` (access denied)
 - **Sin token:** → `401 Unauthorized`
 
 **Ejemplo con token de usuario (espera 403):**
 ```bash
-curl -H "Authorization: Bearer user-token" http://localhost:8000/access-denied
+curl -H "Authorization: Bearer user-token" http://localhost:8000/api/admin/users
 ```
 
 **Respuesta:** `403 Forbidden`
 ```json
 {
   "detail": "Access denied"
+}
+```
+
+**Ejemplo con token admin (espera 200):**
+```bash
+curl -H "Authorization: Bearer valid-token" http://localhost:8000/api/admin/users
+```
+
+**Respuesta:** `200 OK`
+```json
+{
+  "users": [
+    {"id": "user1", "role": "admin"},
+    {"id": "user2", "role": "user"}
+  ],
+  "message": "Users list retrieved successfully",
+  "accessed_by": "user1"
 }
 ```
 
@@ -159,33 +152,33 @@ curl -H "Authorization: Bearer user-token" http://localhost:8000/access-denied
 
 ```bash
 # Token válido (debe retornar 200)
-curl -H "Authorization: Bearer valid-token" http://localhost:8000/validate-token
+curl -H "Authorization: Bearer valid-token" http://localhost:8000/api/users/me
 
 # Token inválido (debe retornar 401)
-curl -H "Authorization: Bearer invalid-token" http://localhost:8000/validate-token
+curl -H "Authorization: Bearer invalid-token" http://localhost:8000/api/users/me
 
 # Sin token (debe retornar 401)
-curl http://localhost:8000/validate-token
+curl http://localhost:8000/api/users/me
 ```
 
 ### Probar "expect 401"
 
 ```bash
-# Sin token (debe retornar 401)
-curl http://localhost:8000/expect-401
+# Sin token en /api/users/me (debe retornar 401)
+curl http://localhost:8000/api/users/me
 
-# Token inválido (debe retornar 401)
-curl -H "Authorization: Bearer invalid-token" http://localhost:8000/expect-401
+# Token inválido en /api/users/me (debe retornar 401)
+curl -H "Authorization: Bearer invalid-token" http://localhost:8000/api/users/me
 ```
 
 ### Probar "access denied"
 
 ```bash
 # Token de usuario en endpoint admin (debe retornar 403)
-curl -H "Authorization: Bearer user-token" http://localhost:8000/access-denied
+curl -H "Authorization: Bearer user-token" http://localhost:8000/api/admin/users
 
 # Token admin (debe retornar 200)
-curl -H "Authorization: Bearer valid-token" http://localhost:8000/access-denied
+curl -H "Authorization: Bearer valid-token" http://localhost:8000/api/admin/users
 ```
 
 ## Documentación Interactiva
@@ -199,9 +192,10 @@ Una vez que el servidor esté corriendo:
 
 | DSL Keyword | Endpoint | Caso de Prueba |
 |------------|----------|----------------|
-| `validate token` | `/validate-token` | Token válido → 200 |
-| `expect 401` | `/expect-401` | Sin token o token inválido → 401 |
-| `access denied` | `/access-denied` | Token usuario en endpoint admin → 403 |
+| `validate token` | `/api/users/me` | Token válido → 200 |
+| `expect 401` | `/api/users/me` | Sin token o token inválido → 401 |
+| `access denied` | `/api/admin/users` | Token usuario en endpoint admin → 403 |
+| `access allowed` | `/api/admin/users` | Token admin en endpoint admin → 200 |
 
 ## Códigos de Estado
 

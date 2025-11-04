@@ -3,7 +3,6 @@ Vhape Dummy API - HU2 Implementation
 
 Simple FastAPI server for testing DSL keywords:
 - validate token
-- expect 401
 - access denied
 """
 
@@ -21,9 +20,6 @@ VALID_TOKENS = {
     "valid-token": {"user_id": "user1", "role": "admin"},
     "user-token": {"user_id": "user2", "role": "user"},
 }
-
-# Invalid tokens
-INVALID_TOKENS = ["invalid-token", "expired-token"]
 
 
 def validate_token(token: Optional[str] = None) -> dict:
@@ -64,42 +60,41 @@ async def get_admin_user(current_user: dict = Depends(get_current_user)) -> dict
     return current_user
 
 
-@app.get("/health")
+@app.get("/api/health")
 async def health():
     """Health check endpoint."""
     return {"status": "healthy"}
 
 
-@app.get("/validate-token")
-async def validate_token_endpoint(current_user: dict = Depends(get_current_user)):
+@app.get("/api/users/me")
+async def get_current_user_profile(current_user: dict = Depends(get_current_user)):
     """
-    DSL keyword: validate token
-    Requires valid token. Returns 200 if valid, 401 if invalid/missing.
+    DSL keywords: validate token / expect 401
+    Get current user profile. Requires valid token.
+    Returns 200 if valid, 401 if invalid/missing.
+    Use without token or with invalid token to test "expect 401".
     """
     return {
-        "message": "Token validated",
         "user_id": current_user["user_id"],
+        "role": current_user["role"],
+        "message": "User profile retrieved successfully",
     }
 
 
-@app.get("/expect-401")
-async def expect_401_endpoint(current_user: dict = Depends(get_current_user)):
-    """
-    DSL keyword: expect 401
-    Returns 401 if token is missing or invalid.
-    """
-    return {"message": "Should not reach here"}
-
-
-@app.get("/access-denied")
-async def access_denied_endpoint(admin_user: dict = Depends(get_admin_user)):
+@app.get("/api/admin/users")
+async def get_all_users(admin_user: dict = Depends(get_admin_user)):
     """
     DSL keyword: access denied
+    Get all users list. Admin only.
     Returns 403 if user is not admin, 200 if admin.
     """
     return {
-        "message": "Access granted",
-        "user_id": admin_user["user_id"],
+        "users": [
+            {"id": "user1", "role": "admin"},
+            {"id": "user2", "role": "user"},
+        ],
+        "message": "Users list retrieved successfully",
+        "accessed_by": admin_user["user_id"],
     }
 
 
