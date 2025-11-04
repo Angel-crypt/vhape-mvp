@@ -1,0 +1,40 @@
+// Vhape DSL Grammar for Lark Parser
+// Grammar to parse Gherkin-style steps for API security testing
+
+%import common.WS
+%import common.ESCAPED_STRING
+%ignore WS
+
+// Tokens
+%ignore /[\t ]+/
+
+// Root rule - a step statement
+start: step
+
+// Step types
+step: given_step | when_step | then_step
+
+// Given steps - Token context
+given_step: "given"i token_context
+token_context: "i"i "have"i token_type
+token_type: valid_token | admin_token | user_token | invalid_token | no_token
+
+valid_token: "a"i "valid"i "token"i
+admin_token: "an"i "admin"i "token"i
+user_token: "a"i "user"i "token"i
+invalid_token: "an"i "invalid"i "token"i
+no_token: ("no"i | "a"i "missing"i) "token"i
+
+// When steps - Request action
+when_step: "when"i "i"i "send"i "a"i "request"i "to"i endpoint
+endpoint: ESCAPED_STRING
+
+// Then steps - Response validation
+then_step: "then"i "the"i "response"i "should"i validation
+validation: validate_token | expect_401 | access_denied | access_allowed
+
+validate_token: "validate"i "token"i
+expect_401: "expect"i "401"i
+access_denied: "access"i "denied"i
+access_allowed: "access"i "allowed"i
+
