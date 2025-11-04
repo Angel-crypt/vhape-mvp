@@ -39,7 +39,6 @@ class StepParser:
             start='start',
             parser='lalr',
             lexer='standard',
-            ambiguity='explicit',
         )
     
     def parse_step(self, step_text: str) -> Dict:
@@ -68,22 +67,36 @@ class StepParser:
     
     def _extract_info(self, tree: Tree) -> Dict:
         """Extract structured information from the parse tree."""
-        if tree.data == 'given_step':
-            return self._extract_given(tree)
-        elif tree.data == 'when_step':
-            return self._extract_when(tree)
-        elif tree.data == 'then_step':
-            return self._extract_then(tree)
+        # The tree structure is: start -> step -> (given_step|when_step|then_step)
+        # We need to unwrap these levels
+        current = tree
+        
+        # Unwrap 'start' if present
+        if current.data == 'start':
+            current = current.children[0]
+        
+        # Unwrap 'step' if present
+        if current.data == 'step':
+            current = current.children[0]
+        
+        # Now we should have the actual step type
+        if current.data == 'given_step':
+            return self._extract_given(current)
+        elif current.data == 'when_step':
+            return self._extract_when(current)
+        elif current.data == 'then_step':
+            return self._extract_then(current)
         else:
-            raise DSLParseError(f"Unknown step type: {tree.data}")
+            raise DSLParseError(f"Unknown step type: {current.data}")
     
     def _extract_given(self, tree: Tree) -> Dict:
         """Extract information from a Given step."""
-        token_tree = tree.children[0]
+        # Structure: given_step -> token_context -> token_type -> (valid_token|admin_token|...)
+        token_context = tree.children[0]  # token_context
+        token_type_node = token_context.children[0]  # token_type
+        actual_token = token_type_node.children[0]  # valid_token, admin_token, etc.
         
-        # Determine token type
-        token_type_node = token_tree.children[0]
-        token_type_name = token_type_node.data
+        token_type_name = actual_token.data
         
         token_type_map = {
             'valid_token': 'valid',
@@ -102,10 +115,12 @@ class StepParser:
     
     def _extract_when(self, tree: Tree) -> Dict:
         """Extract information from a When step."""
-        endpoint_token = tree.children[0]
+        # Structure: when_step -> endpoint -> Token(ESCAPED_STRING, "...")
+        endpoint_tree = tree.children[0]  # endpoint
+        endpoint_token = endpoint_tree.children[0]  # Token with the string
         
-        # Remove quotes from the endpoint string
-        endpoint = str(endpoint_token).strip('"')
+        # Extract the string value and remove quotes
+        endpoint = str(endpoint_token.value).strip('"')
         
         return {
             'type': 'when',
@@ -114,8 +129,11 @@ class StepParser:
     
     def _extract_then(self, tree: Tree) -> Dict:
         """Extract information from a Then step."""
-        validation_tree = tree.children[0]
-        validation_name = validation_tree.data
+        # Structure: then_step -> validation -> (validate_token|expect_401|...)
+        validation_tree = tree.children[0]  # validation
+        actual_validation = validation_tree.children[0]  # validate_token, expect_401, etc.
+        
+        validation_name = actual_validation.data
         
         validation_map = {
             'validate_token': 'validate_token',
