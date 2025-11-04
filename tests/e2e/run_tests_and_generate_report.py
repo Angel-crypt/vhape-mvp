@@ -137,12 +137,27 @@ def main():
     print("🔍 Ejecutando tests de Behave...")
     print()
     
-    result = subprocess.run(
-        [sys.executable, '-m', 'behave', 'features/', '--no-capture'],
-        cwd=project_root,
-        capture_output=True,
-        text=True
-    )
+    # Behave searches for behave.ini in current directory and parent directories
+    # Since behave.ini is in vhape/, we need to copy it to project root temporarily
+    import shutil
+    behave_ini_source = project_root / 'vhape' / 'behave.ini'
+    behave_ini_temp = project_root / 'behave.ini'
+    
+    # Copy behave.ini to project root temporarily
+    if behave_ini_source.exists():
+        shutil.copy2(behave_ini_source, behave_ini_temp)
+    
+    try:
+        result = subprocess.run(
+            [sys.executable, '-m', 'behave', 'features/', '--no-capture'],
+            cwd=project_root,
+            capture_output=True,
+            text=True
+        )
+    finally:
+        # Remove temporary behave.ini from project root
+        if behave_ini_temp.exists():
+            behave_ini_temp.unlink()
     
     output = result.stdout + result.stderr
     

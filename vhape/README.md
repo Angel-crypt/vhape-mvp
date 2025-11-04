@@ -22,6 +22,7 @@ vhape/
 │   ├── summary.py       # TestSummary class for reports
 │   └── __init__.py      # Exports TestSummary
 │
+├── behave.ini           # Behave configuration file
 └── __init__.py          # Module initialization
 ```
 

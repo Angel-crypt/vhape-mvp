@@ -103,9 +103,171 @@ vhape-mvp/
 
 ---
 
+## Step-by-Step Guide
+
+### Step 1: Configure API URL
+
+Before running tests, configure the API URL you want to test. You can do this in two ways:
+
+**Option A: Environment Variable (Recommended)**
+
+```bash
+# Set the API URL
+export VHAPE_API_URL="http://localhost:8000"
+
+# Or for Windows PowerShell
+$env:VHAPE_API_URL="http://localhost:8000"
+
+# Or for Windows CMD
+set VHAPE_API_URL=http://localhost:8000
+```
+
+**Option B: Default Value**
+
+If not set, Vhape defaults to `http://localhost:8000`. You can change this in `features/steps/auth_steps.py`:
+
+```python
+API_BASE_URL = os.getenv("VHAPE_API_URL", "http://your-api-url.com")
+```
+
+### Step 2: Create a Feature File
+
+Create a new feature file in the `features/` directory:
+
+```bash
+# Create a new feature file
+touch features/my_api_security.feature
+# or
+# On Windows: type nul > features\my_api_security.feature
+```
+
+**Feature File Structure:**
+
+```gherkin
+Feature: My API Security Tests
+  As a developer
+  I want to validate my API security
+  So that I can ensure it's protected
+
+  Scenario: Valid token should grant access
+    Given I have a valid token
+    When I send a request to "/api/users/me"
+    Then the response should validate token
+
+  Scenario: Invalid token should return 401
+    Given I have an invalid token
+    When I send a request to "/api/users/me"
+    Then the response should expect 401
+
+  Scenario: Admin can access admin endpoint
+    Given I have an admin token
+    When I send a request to "/api/admin/users"
+    Then the response should access allowed
+
+  Scenario: User cannot access admin endpoint
+    Given I have a user token
+    When I send a request to "/api/admin/users"
+    Then the response should access denied
+```
+
+### Step 3: Understanding DSL Keywords
+
+**Given (Setup):**
+- `I have a valid token` - Use a valid authentication token
+- `I have an admin token` - Use an admin-level token
+- `I have a user token` - Use a user-level token
+- `I have an invalid token` - Use an invalid/expired token
+- `I have no token` - Don't send any token
+
+**When (Action):**
+- `I send a request to "/your/endpoint"` - Send HTTP request to the endpoint
+
+**Then (Validation):**
+- `the response should validate token` - Expect 200 OK with valid response
+- `the response should expect 401` - Expect 401 Unauthorized
+- `the response should access denied` - Expect 403 Forbidden (access denied)
+- `the response should access allowed` - Expect 200 OK (access granted)
+
+> 📖 **For complete DSL syntax and keywords**, see:
+>
+> - [`docs/dsl-syntax.md`](docs/dsl-syntax.md) - Complete DSL syntax guide
+> - [`docs/dsl-keywords-reference.md`](docs/dsl-keywords-reference.md) - Quick keyword reference
+
+### Step 4: Run Your Tests
+
+**Run all tests with report generation (recommended):**
+
+```bash
+python tests/e2e/run_tests_and_generate_report.py
+```
+
+**Run a specific feature file:**
+
+```bash
+behave features/my_api_security.feature
+```
+
+**Run with verbose output:**
+
+```bash
+behave features/my_api_security.feature --no-capture
+```
+
+**Run by tags (if you add tags to scenarios):**
+
+```bash
+behave --tags=@smoke     # Run only smoke tests
+behave --tags=@security  # Run only security tests
+```
+
+> **Note:** The `behave.ini` configuration file is located in `vhape/` directory. The script `run_tests_and_generate_report.py` automatically handles copying it to the project root when needed. For direct `behave` commands from the project root, you may need to temporarily copy `vhape/behave.ini` to the root, or run `behave` from the `vhape/` directory.
+
+### Step 5: Review Results
+
+After running tests, you'll see:
+
+1. **Console Output:**
+   ```
+   ============================================================
+     VHAPE - Security Test Summary
+   ============================================================
+   
+   📋 Features:   Total: 1, ✅ Passed: 1, ❌ Failed: 0
+   🎯 Scenarios:  Total: 4, ✅ Passed: 4, ❌ Failed: 0
+   📝 Steps:      Total: 12, ✅ Passed: 12, ❌ Failed: 0
+   ⚠️  Security Issues: 0
+   
+   📊 Success Rate: 100.0%
+   ⏱️  Duration: 1.23s
+   ```
+
+2. **JSON Report:**
+   - Location: `tests/results/summary_YYYYMMDD_HHMMSS.json`
+   - Contains detailed test results, security issues, and statistics
+
+### Step 6: Customize for Your API
+
+If your API uses different authentication (e.g., API keys, custom headers), you'll need to:
+
+1. **Update token mapping** in `features/steps/auth_steps.py`:
+   ```python
+   TOKEN_MAP = {
+       'valid': 'your-valid-token',
+       'admin': 'your-admin-token',
+       'user': 'your-user-token',
+       'invalid': 'invalid-token-123'
+   }
+   ```
+
+2. **Modify request headers** in `features/steps/auth_steps.py` if needed (currently uses `Authorization: Bearer <token>`)
+
+3. **Adjust endpoint paths** in your feature files to match your API structure
+
+---
+
 ## Usage Example
 
-Create a feature file (e.g., `features/my_api.feature`):
+Here's a complete example feature file (`features/my_api.feature`):
 
 ```gherkin
 Feature: My API Security Tests
@@ -123,11 +285,6 @@ Feature: My API Security Tests
     When I send a request to "/api/users/me"
     Then the response should expect 401
 ```
-
-> 📖 **For complete DSL syntax and keywords**, see:
->
-> - [`docs/dsl-syntax.md`](docs/dsl-syntax.md) - Complete DSL syntax guide
-> - [`docs/dsl-keywords-reference.md`](docs/dsl-keywords-reference.md) - Quick keyword reference
 
 ---
 
