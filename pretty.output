@@ -138,6 +138,138 @@ Feature: Edge Cases and Boundary Conditions # features/edge_cases.feature:1
     When I send a request to "/api/health"      # features/steps/auth_steps.py:74
     Then the response should access allowed     # features/steps/auth_steps.py:130
 
+Feature: Failure Scenarios and Negative Testing # features/failure_scenarios.feature:1
+  As a developer
+  I want to test scenarios that intentionally fail
+  So that I can verify the reporting system works correctly for both success and failure cases
+  @negative @testing @failure
+  Scenario: Invalid token should fail when expecting valid token  # features/failure_scenarios.feature:7
+    Given I have an invalid token                                 # features/steps/auth_steps.py:27
+    When I send a request to "/api/users/me"                      # features/steps/auth_steps.py:74
+    Then the response should validate token                       # features/steps/auth_steps.py:130
+      ASSERT FAILED: ❌ Token validation failed (insecure) - Expected 200 OK for validate_token, got 401
+      Traceback (most recent call last):
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/model.py", line 1991, in run
+          match.run(runner.context)
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/matchers.py", line 105, in run
+          self.func(context, *args, **kwargs)
+        File "features/steps/auth_steps.py", line 193, in step_then_validate
+          raise AssertionError(security_message)
+      AssertionError: ❌ Token validation failed (insecure) - Expected 200 OK for validate_token, got 401
+
+
+  @negative @testing @failure
+  Scenario: Missing token should fail when expecting valid token  # features/failure_scenarios.feature:14
+    Given I have no token                                         # features/steps/auth_steps.py:27
+    When I send a request to "/api/users/me"                      # features/steps/auth_steps.py:74
+    Then the response should validate token                       # features/steps/auth_steps.py:130
+      ASSERT FAILED: ❌ Token validation failed (insecure) - Expected 200 OK for validate_token, got 401
+      Traceback (most recent call last):
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/model.py", line 1991, in run
+          match.run(runner.context)
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/matchers.py", line 105, in run
+          self.func(context, *args, **kwargs)
+        File "features/steps/auth_steps.py", line 193, in step_then_validate
+          raise AssertionError(security_message)
+      AssertionError: ❌ Token validation failed (insecure) - Expected 200 OK for validate_token, got 401
+
+
+  @negative @testing @failure
+  Scenario: Valid token should fail when expecting 401  # features/failure_scenarios.feature:21
+    Given I have a valid token                          # features/steps/auth_steps.py:27
+    When I send a request to "/api/users/me"            # features/steps/auth_steps.py:74
+    Then the response should expect 401                 # features/steps/auth_steps.py:130
+      ASSERT FAILED: ❌ Unauthorized access allowed (insecure) - Expected 401, got 200
+      Traceback (most recent call last):
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/model.py", line 1991, in run
+          match.run(runner.context)
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/matchers.py", line 105, in run
+          self.func(context, *args, **kwargs)
+        File "features/steps/auth_steps.py", line 211, in step_then_validate
+          raise AssertionError(security_message)
+      AssertionError: ❌ Unauthorized access allowed (insecure) - Expected 401, got 200
+
+
+  @negative @testing @failure
+  Scenario: Admin token should fail when expecting 401  # features/failure_scenarios.feature:28
+    Given I have an admin token                         # features/steps/auth_steps.py:27
+    When I send a request to "/api/users/me"            # features/steps/auth_steps.py:74
+    Then the response should expect 401                 # features/steps/auth_steps.py:130
+      ASSERT FAILED: ❌ Unauthorized access allowed (insecure) - Expected 401, got 200
+      Traceback (most recent call last):
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/model.py", line 1991, in run
+          match.run(runner.context)
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/matchers.py", line 105, in run
+          self.func(context, *args, **kwargs)
+        File "features/steps/auth_steps.py", line 211, in step_then_validate
+          raise AssertionError(security_message)
+      AssertionError: ❌ Unauthorized access allowed (insecure) - Expected 401, got 200
+
+
+  @negative @testing @failure
+  Scenario: User token should fail when expecting access allowed on admin endpoint  # features/failure_scenarios.feature:35
+    Given I have a user token                                                       # features/steps/auth_steps.py:27
+    When I send a request to "/api/admin/users"                                     # features/steps/auth_steps.py:74
+    Then the response should access allowed                                         # features/steps/auth_steps.py:130
+      ASSERT FAILED: ❌ Access denied when it should be allowed (insecure) - Expected 200 OK for access_allowed, got 403
+      Traceback (most recent call last):
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/model.py", line 1991, in run
+          match.run(runner.context)
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/matchers.py", line 105, in run
+          self.func(context, *args, **kwargs)
+        File "features/steps/auth_steps.py", line 253, in step_then_validate
+          raise AssertionError(security_message)
+      AssertionError: ❌ Access denied when it should be allowed (insecure) - Expected 200 OK for access_allowed, got 403
+
+
+  @negative @testing @failure
+  Scenario: Invalid token should fail when expecting access allowed  # features/failure_scenarios.feature:42
+    Given I have an invalid token                                    # features/steps/auth_steps.py:27
+    When I send a request to "/api/admin/users"                      # features/steps/auth_steps.py:74
+    Then the response should access allowed                          # features/steps/auth_steps.py:130
+      ASSERT FAILED: ❌ Access denied when it should be allowed (insecure) - Expected 200 OK for access_allowed, got 401
+      Traceback (most recent call last):
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/model.py", line 1991, in run
+          match.run(runner.context)
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/matchers.py", line 105, in run
+          self.func(context, *args, **kwargs)
+        File "features/steps/auth_steps.py", line 253, in step_then_validate
+          raise AssertionError(security_message)
+      AssertionError: ❌ Access denied when it should be allowed (insecure) - Expected 200 OK for access_allowed, got 401
+
+
+  @negative @testing @failure
+  Scenario: Admin token should fail when expecting access denied on user endpoint  # features/failure_scenarios.feature:49
+    Given I have an admin token                                                    # features/steps/auth_steps.py:27
+    When I send a request to "/api/users/me"                                       # features/steps/auth_steps.py:74
+    Then the response should access denied                                         # features/steps/auth_steps.py:130
+      ASSERT FAILED: ❌ Unauthorized access allowed (insecure) - Expected 403, got 200
+      Traceback (most recent call last):
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/model.py", line 1991, in run
+          match.run(runner.context)
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/matchers.py", line 105, in run
+          self.func(context, *args, **kwargs)
+        File "features/steps/auth_steps.py", line 231, in step_then_validate
+          raise AssertionError(security_message)
+      AssertionError: ❌ Unauthorized access allowed (insecure) - Expected 403, got 200
+
+
+  @negative @testing @failure
+  Scenario: Valid token should fail when expecting access denied on health endpoint  # features/failure_scenarios.feature:56
+    Given I have a valid token                                                       # features/steps/auth_steps.py:27
+    When I send a request to "/api/health"                                           # features/steps/auth_steps.py:74
+    Then the response should access denied                                           # features/steps/auth_steps.py:130
+      ASSERT FAILED: ❌ Unauthorized access allowed (insecure) - Expected 403, got 200
+      Traceback (most recent call last):
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/model.py", line 1991, in run
+          match.run(runner.context)
+        File "/home/angel/PycharmProjects/vhape-mvp/.venv/lib/python3.12/site-packages/behave/matchers.py", line 105, in run
+          self.func(context, *args, **kwargs)
+        File "features/steps/auth_steps.py", line 231, in step_then_validate
+          raise AssertionError(security_message)
+      AssertionError: ❌ Unauthorized access allowed (insecure) - Expected 403, got 200
+
+
 Feature: Complete Authentication Workflow # features/workflow.feature:1
   As a developer
   I want to test complete authentication workflows

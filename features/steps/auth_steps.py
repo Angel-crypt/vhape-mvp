@@ -169,35 +169,102 @@ def step_then_validate(context, validation_description):
         raise AssertionError("No response available. Did you call the When step?")
     
     # Validate based on DSL keyword
-    if validation == 'validate_token':
-        assert context.response_status == 200, \
-            f"Expected 200 OK for validate_token, got {context.response_status}"
-        assert 'user_id' in context.response_data or 'message' in context.response_data, \
-            "Response should contain user information"
+    security_message = None
+    security_status = None
     
-    elif validation == 'expect_401':
-        assert context.response_status == 401, \
-            f"Expected 401 Unauthorized, got {context.response_status}"
-        assert 'detail' in context.response_data, \
-            "Response should contain error detail"
+    try:
+        if validation == 'validate_token':
+            if context.response_status == 200:
+                assert 'user_id' in context.response_data or 'message' in context.response_data, \
+                    "Response should contain user information"
+                security_message = "✅ Access correctly granted (secure)"
+                security_status = 'secure'
+            else:
+                # Security issue: token validation failed when it should have passed
+                # This could indicate the token is invalid when it should be valid
+                security_message = f"❌ Token validation failed (insecure) - Expected 200 OK for validate_token, got {context.response_status}"
+                security_status = 'insecure'
+                if hasattr(context, 'test_summary'):
+                    context.test_summary.add_security_issue(
+                        f"Token validation failed when it should have passed - Expected 200, got {context.response_status}",
+                        validation_description,
+                        'high'
+                    )
+                raise AssertionError(security_message)
+        
+        elif validation == 'expect_401':
+            if context.response_status == 401:
+                assert 'detail' in context.response_data, \
+                    "Response should contain error detail"
+                security_message = "✅ Access correctly denied (secure)"
+                security_status = 'secure'
+            else:
+                # Security issue: unauthorized access was allowed
+                security_message = f"❌ Unauthorized access allowed (insecure) - Expected 401, got {context.response_status}"
+                security_status = 'insecure'
+                if hasattr(context, 'test_summary'):
+                    context.test_summary.add_security_issue(
+                        "Unauthorized access allowed when 401 was expected",
+                        validation_description,
+                        'high'
+                    )
+                raise AssertionError(security_message)
+        
+        elif validation == 'access_denied':
+            if context.response_status == 403:
+                assert 'detail' in context.response_data, \
+                    "Response should contain error detail"
+                assert 'Access denied' in context.response_data.get('detail', ''), \
+                    "Response detail should mention access denied"
+                security_message = "✅ Access correctly denied (secure)"
+                security_status = 'secure'
+            else:
+                # Security issue: access should have been denied
+                security_message = f"❌ Unauthorized access allowed (insecure) - Expected 403, got {context.response_status}"
+                security_status = 'insecure'
+                if hasattr(context, 'test_summary'):
+                    context.test_summary.add_security_issue(
+                        "Unauthorized access allowed when 403 was expected",
+                        validation_description,
+                        'high'
+                    )
+                raise AssertionError(security_message)
+        
+        elif validation == 'access_allowed':
+            if context.response_status == 200:
+                assert ('users' in context.response_data or 
+                        'message' in context.response_data or 
+                        'status' in context.response_data or
+                        'user_id' in context.response_data), \
+                    "Response should contain data (users, message, status, or user_id)"
+                security_message = "✅ Access correctly granted (secure)"
+                security_status = 'secure'
+            else:
+                # Security issue: access was denied when it should have been allowed
+                # This could indicate insufficient permissions or authentication issues
+                security_message = f"❌ Access denied when it should be allowed (insecure) - Expected 200 OK for access_allowed, got {context.response_status}"
+                security_status = 'insecure'
+                if hasattr(context, 'test_summary'):
+                    context.test_summary.add_security_issue(
+                        f"Access denied when it should have been allowed - Expected 200, got {context.response_status}",
+                        validation_description,
+                        'medium'
+                    )
+                raise AssertionError(security_message)
+        
+        else:
+            raise AssertionError(f"Unknown validation: {validation}")
+        
+        # Print security message if available
+        if security_message:
+            print(f"    {security_message}")
+        
+        # Record step in summary
+        if hasattr(context, 'test_summary'):
+            context.test_summary.add_step(validation_description, 'passed')
     
-    elif validation == 'access_denied':
-        assert context.response_status == 403, \
-            f"Expected 403 Forbidden, got {context.response_status}"
-        assert 'detail' in context.response_data, \
-            "Response should contain error detail"
-        assert 'Access denied' in context.response_data.get('detail', ''), \
-            "Response detail should mention access denied"
-    
-    elif validation == 'access_allowed':
-        assert context.response_status == 200, \
-            f"Expected 200 OK for access_allowed, got {context.response_status}"
-        # Accept various response formats: user data, admin data, or health status
-        assert ('users' in context.response_data or 
-                'message' in context.response_data or 
-                'status' in context.response_data or
-                'user_id' in context.response_data), \
-            "Response should contain data (users, message, status, or user_id)"
-    
-    else:
-        raise AssertionError(f"Unknown validation: {validation}")
+    except AssertionError as e:
+        # Record failed step in summary
+        if hasattr(context, 'test_summary'):
+            context.test_summary.add_step(validation_description, 'failed', str(e))
+        raise

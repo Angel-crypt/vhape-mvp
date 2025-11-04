@@ -1,160 +1,160 @@
-# Colección Postman para Vhape Dummy API
+# Postman Collection for Vhape Dummy API
 
-Colección completa de Postman y environment para probar todos los escenarios de autenticación del API dummy de Vhape.
+Complete Postman collection and environment for testing all authentication scenarios of the Vhape dummy API.
 
-## Archivos
+## Files
 
-- **Vhape_Dummy_API.postman_collection.json** - Colección de pruebas completa con todos los endpoints
-- **Vhape_Dummy_API.postman_environment.json** - Variables de environment con tokens y URL base
+- **Vhape_Dummy_API.postman_collection.json** - Complete test collection with all endpoints
+- **Vhape_Dummy_API.postman_environment.json** - Environment variables with tokens and base URL
 
-## Instrucciones de Importación
+## Import Instructions
 
-### Paso 1: Importar Colección
+### Step 1: Import Collection
 
-1. Abrir Postman
-2. Clic en botón **Import** (arriba a la izquierda)
-3. Clic en **Upload Files**
-4. Seleccionar `Vhape_Dummy_API.postman_collection.json`
-5. Clic en **Import**
+1. Open Postman
+2. Click **Import** button (top left)
+3. Click **Upload Files**
+4. Select `Vhape_Dummy_API.postman_collection.json`
+5. Click **Import**
 
-### Paso 2: Importar Environment
+### Step 2: Import Environment
 
-1. Clic en botón **Import** nuevamente
-2. Clic en **Upload Files**
-3. Seleccionar `Vhape_Dummy_API.postman_environment.json`
-4. Clic en **Import**
+1. Click **Import** button again
+2. Click **Upload Files**
+3. Select `Vhape_Dummy_API.postman_environment.json`
+4. Click **Import**
 
-### Paso 3: Seleccionar Environment
+### Step 3: Select Environment
 
-1. En la esquina superior derecha, clic en el dropdown de environment
-2. Seleccionar **"Vhape Dummy API - Local"**
+1. In the top right corner, click the environment dropdown
+2. Select **"Vhape Dummy API - Local"**
 
-## Estructura de la Colección
+## Collection Structure
 
-La colección está organizada en 3 carpetas:
+The collection is organized in 3 folders:
 
 ### 1. Health Check
-- `GET /api/health` - Verificar que el servidor funciona
+- `GET /api/health` - Verify that the server is running
 
-**Esperado:** Retorna `200 OK` sin autenticación
+**Expected:** Returns `200 OK` without authentication
 
 ### 2. Users - Get Current User Profile
-- `GET /api/users/me` (con token válido) → `200` (validate token)
-- `GET /api/users/me` (con token inválido) → `401` (expect 401)
-- `GET /api/users/me` (sin token) → `401` (expect 401)
+- `GET /api/users/me` (with valid token) → `200` (validate token)
+- `GET /api/users/me` (with invalid token) → `401` (expect 401)
+- `GET /api/users/me` (without token) → `401` (expect 401)
 
-**Esperado:** Retorna `200 OK` con token válido (validate token), `401 Unauthorized` con token inválido o sin token (expect 401)
+**Expected:** Returns `200 OK` with valid token (validate token), `401 Unauthorized` with invalid token or no token (expect 401)
 
 ### 3. Admin - Get All Users
-- `GET /api/admin/users` (con token usuario) → `403` (access denied)
-- `GET /api/admin/users` (con token admin) → `200` (access allowed)
+- `GET /api/admin/users` (with user token) → `403` (access denied)
+- `GET /api/admin/users` (with admin token) → `200` (access allowed)
 
-**Esperado:** Retorna `403 Forbidden` con token de usuario (access denied), `200 OK` con token admin (access allowed)
+**Expected:** Returns `403 Forbidden` with user token (access denied), `200 OK` with admin token (access allowed)
 
-## Variables de Environment
+## Environment Variables
 
-| Variable | Valor | Descripción |
+| Variable | Value | Description |
 |----------|-------|-------------|
-| `base_url` | `http://localhost:8000` | URL base del API |
-| `valid_token` | `valid-token` | Token de usuario admin |
-| `user_token` | `user-token` | Token de usuario regular |
-| `invalid_token` | `invalid-token` | Token inválido para pruebas |
-| `expired_token` | `expired-token` | Token expirado para pruebas |
+| `base_url` | `http://localhost:8000` | API base URL |
+| `valid_token` | `valid-token` | Admin user token |
+| `user_token` | `user-token` | Regular user token |
+| `invalid_token` | `invalid-token` | Invalid token for testing |
+| `expired_token` | `expired-token` | Expired token for testing |
 
-## Ejecutar Pruebas
+## Running Tests
 
-### Ejecutar Request Individual
+### Run Individual Request
 
-1. Seleccionar un request de la colección
-2. Clic en **Send**
-3. Revisar la pestaña **Test Results** para ver los resultados de validación
+1. Select a request from the collection
+2. Click **Send**
+3. Review the **Test Results** tab to see validation results
 
-### Ejecutar Colección Completa
+### Run Complete Collection
 
-1. Clic derecho en el nombre de la colección
-2. Seleccionar **Run collection**
-3. Clic en **Run Vhape Dummy API - Suite de Pruebas**
-4. Revisar resultados de todas las pruebas
+1. Right-click on the collection name
+2. Select **Run collection**
+3. Click **Run Vhape Dummy API - Test Suite**
+4. Review results of all tests
 
-### Ejecutar con Collection Runner
+### Run with Collection Runner
 
-1. Clic en **Collections** en la barra lateral
-2. Clic en **Run** junto a la colección
-3. Seleccionar qué requests ejecutar
-4. Clic en **Run Vhape Dummy API**
-5. Ver resumen de resultados
+1. Click **Collections** in the sidebar
+2. Click **Run** next to the collection
+3. Select which requests to run
+4. Click **Run Vhape Dummy API**
+5. View summary of results
 
-## Scripts de Prueba
+## Test Scripts
 
-Cada request incluye scripts automatizados que validan:
+Each request includes automated scripts that validate:
 
-- ✅ **Códigos de estado** - Verifica códigos HTTP correctos
-- ✅ **Estructura de respuesta** - Verifica propiedades JSON esperadas
-- ✅ **Mensajes de error** - Valida mensajes de detalle de error
-- ✅ **Validación de datos** - Asegura que los datos de respuesta coincidan con las expectativas
+- ✅ **Status codes** - Verifies correct HTTP codes
+- ✅ **Response structure** - Verifies expected JSON properties
+- ✅ **Error messages** - Validates error detail messages
+- ✅ **Data validation** - Ensures response data matches expectations
 
-## Prueba de DSL Keywords
+## DSL Keywords Testing
 
-La colección incluye endpoints específicos para probar DSL keywords:
+The collection includes specific endpoints for testing DSL keywords:
 
 ### `validate token`
 - **Endpoint:** `GET /api/users/me`
-- **Uso:** Token válido en header Authorization
-- **Esperado:** `200 OK` con perfil de usuario
+- **Usage:** Valid token in Authorization header
+- **Expected:** `200 OK` with user profile
 
 ### `expect 401`
 - **Endpoint:** `GET /api/users/me`
-- **Uso:** Sin token o con token inválido
-- **Esperado:** `401 Unauthorized`
+- **Usage:** No token or with invalid token
+- **Expected:** `401 Unauthorized`
 
 ### `access denied`
 - **Endpoint:** `GET /api/admin/users`
-- **Uso:** Token de usuario en endpoint admin
-- **Esperado:** `403 Forbidden`
+- **Usage:** User token in admin endpoint
+- **Expected:** `403 Forbidden`
 
 ### `access allowed`
 - **Endpoint:** `GET /api/admin/users`
-- **Uso:** Token admin en endpoint admin
-- **Esperado:** `200 OK`
+- **Usage:** Admin token in admin endpoint
+- **Expected:** `200 OK`
 
-## Referencia de Códigos de Estado
+## Status Code Reference
 
-| Código | Significado | Cuándo Ocurre |
-|--------|-------------|---------------|
-| `200 OK` | Éxito | Token válido, acceso autorizado |
-| `401 Unauthorized` | Autenticación fallida | Token inválido o faltante |
-| `403 Forbidden` | Autorización fallida | Token válido pero sin permisos suficientes |
+| Code | Meaning | When It Occurs |
+|------|---------|----------------|
+| `200 OK` | Success | Valid token, authorized access |
+| `401 Unauthorized` | Authentication failed | Invalid or missing token |
+| `403 Forbidden` | Authorization failed | Valid token but insufficient permissions |
 
-## Consejos
+## Tips
 
-1. **Verificar Environment**: Siempre asegurar que "Vhape Dummy API - Local" esté seleccionado
-2. **Servidor Corriendo**: Asegurar que el servidor API esté corriendo en `http://localhost:8000`
-3. **Ver Resultados**: Clic en cualquier request y revisar la pestaña **Test Results**
-4. **Modificar Variables**: Editar variables de environment si necesitas diferentes tokens o URLs
-5. **Exportar Resultados**: Usar la función de exportar de Postman para guardar resultados de pruebas
+1. **Check Environment**: Always ensure "Vhape Dummy API - Local" is selected
+2. **Server Running**: Ensure the API server is running at `http://localhost:8000`
+3. **View Results**: Click on any request and review the **Test Results** tab
+4. **Modify Variables**: Edit environment variables if you need different tokens or URLs
+5. **Export Results**: Use Postman's export function to save test results
 
-## Solución de Problemas
+## Troubleshooting
 
-### La colección no se importa
-- Asegurar que estás usando Postman v9.0 o posterior
-- Verificar que los archivos JSON sean válidos
+### Collection won't import
+- Ensure you're using Postman v9.0 or later
+- Verify that the JSON files are valid
 
-### Las pruebas fallan
-- Verificar que el servidor API esté corriendo: `./api_dummy/run.sh`
-- Verificar que el environment esté seleccionado
-- Verificar que `base_url` apunte al servidor correcto
+### Tests are failing
+- Verify that the API server is running: `./api_dummy/run.sh`
+- Verify that the environment is selected
+- Verify that `base_url` points to the correct server
 
-### Las variables no funcionan
-- Asegurar que el environment esté seleccionado en el dropdown
-- Verificar que los nombres de variables coincidan exactamente (sensible a mayúsculas)
-- Verificar que las variables estén habilitadas en el environment
+### Variables aren't working
+- Ensure the environment is selected in the dropdown
+- Verify that variable names match exactly (case-sensitive)
+- Verify that variables are enabled in the environment
 
-## Próximos Pasos
+## Next Steps
 
-Después de importar y ejecutar la colección:
+After importing and running the collection:
 
-1. ✅ Verificar que todas las pruebas pasen
-2. ✅ Revisar estructuras de respuesta
-3. ✅ Probar casos límite manualmente
-4. ✅ Exportar resultados para documentación
-5. ✅ Compartir colección con miembros del equipo
+1. ✅ Verify that all tests pass
+2. ✅ Review response structures
+3. ✅ Test edge cases manually
+4. ✅ Export results for documentation
+5. ✅ Share collection with team members
