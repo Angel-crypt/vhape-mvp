@@ -12,6 +12,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from vhape.reporting.summary import TestSummary
+from tests.e2e.html_report_generator import generate_html_report
 
 
 def parse_behave_output(output: str) -> dict:
@@ -109,19 +110,6 @@ def extract_features_and_scenarios(output: str) -> list:
 
 
 def main():
-    """
-    Ejecuta todos los tests e2e y genera reporte.
-    
-    Ejecuta todas las features en el directorio features/, incluyendo:
-    - auth.feature: Tests de autenticación básicos
-    - api_security.feature: Tests de seguridad de API
-    - edge_cases.feature: Casos límite
-    - failure_scenarios.feature: Escenarios que fallan intencionalmente (para probar el sistema de reportes)
-    - workflow.feature: Flujos de trabajo completos
-    
-    Nota: Algunos escenarios en failure_scenarios.feature están diseñados para fallar
-    y esto es esperado. El sistema de reportes debe capturar tanto éxitos como fallos.
-    """
     project_root = Path(__file__).parent.parent.parent
     os.chdir(project_root)
     
@@ -132,8 +120,7 @@ def main():
     
     # Ejecutar behave y capturar output
     # Esto ejecutará TODAS las features en features/, incluyendo las que fallan intencionalmente
-    print("[INFO] Ejecutando tests de Behave (todas las features)...")
-    print("[INFO] Nota: Algunos escenarios en failure_scenarios.feature fallan intencionalmente.")
+    print("[INFO] Ejecutando tests de Behave ...")
     print()
     
     # Behave searches for behave.ini in current directory and parent directories
@@ -275,20 +262,45 @@ def main():
     print()
     summary.print_summary()
     
-    # Si ya había un JSON generado por Behave y lo usamos, no sobrescribirlo
-    # Solo guardar un nuevo JSON si creamos el summary desde el parsing
+    # Determine the JSON file path
+    json_file_path = None
     if summary_json_file and summary_json_file.stat().st_mtime > (datetime.now().timestamp() - 10):
-        # Ya tenemos el JSON con los security issues, solo informar
-        print(f"[SAVE] JSON Report (with security issues): {summary_json_file}")
-        print()
+        # Ya tenemos el JSON con los security issues
+        json_file_path = summary_json_file
+        print(f"[SAVE] JSON Report (with security issues): {json_file_path}")
     else:
         # Guardar JSON desde el parsing (fallback)
         results_dir = Path('tests/results')
         results_dir.mkdir(parents=True, exist_ok=True)
-        json_file = summary.save_json(results_dir / f"summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+        json_file_path = summary.save_json(results_dir / f"summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+        print(f"[SAVE] JSON Report saved to: {json_file_path}")
+    
+    # Generate HTML report from JSON
+    print()
+    print("[INFO] Generating HTML report...")
+    try:
+        html_file = generate_html_report(json_file_path)
+        html_absolute = html_file.absolute()
+        print(f"[SAVE] HTML Report generated: {html_file}")
         
-        print(f"[SAVE] JSON Report saved to: {json_file}")
-        print()
+        # Try to open the report in the default browser
+        try:
+            import webbrowser
+            file_url = f'file:///{html_absolute.as_posix()}'
+            webbrowser.open(file_url)
+            print(f"[INFO] HTML report opened in your default browser")
+        except Exception as browser_error:
+            # If browser opening fails, just show the path
+            if sys.platform == 'win32':
+                print(f"[INFO] Open the report manually: {html_absolute}")
+            else:
+                print(f"[INFO] Open the report manually: file://{html_absolute}")
+    except Exception as e:
+        print(f"[FAIL] Error generating HTML report: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    print()
     
     return result.returncode
 

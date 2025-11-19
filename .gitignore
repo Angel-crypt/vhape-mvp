@@ -59,6 +59,7 @@ desktop.ini
 
 # Test results (generated)
 tests/results/*.json
+tests/results/*.html
 
 # Project documentation (PDF)
 docs/project/
