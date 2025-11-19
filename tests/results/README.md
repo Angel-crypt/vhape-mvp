@@ -46,7 +46,7 @@ These files contain:
 **Recommended Method: Report Script**
 
 ```bash
-python tests/e2e/run_tests_and_generate_report.py
+python tests/e2e/run_e2e_tests.py
 ```
 
 This script:

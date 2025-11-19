@@ -20,7 +20,7 @@
 | **Postman (colecciones)** | `api_dummy/postman/Vhape_Dummy_API.postman_environment.json` | Variables de entorno de Postman (base_url) para usar con la colección |
 | **requests** | `features/steps/auth_steps.py` | Biblioteca HTTP usada en los steps de Behave para enviar peticiones GET a los endpoints de la API |
 | **requests** | `features/steps/environment.py` | Usada para verificar el estado de salud de la API antes de ejecutar los tests |
-| **Script de ejecución de tests** | `tests/e2e/run_tests_and_generate_report.py` | Script principal que ejecuta Behave, parsea resultados, genera reportes JSON y muestra resumen en consola |
+| **Script de ejecución de tests** | `tests/e2e/run_e2e_tests.py` | Script principal que ejecuta Behave, parsea resultados, genera reportes JSON y muestra resumen en consola |
 | **Configuración de tokens** | `features/steps/auth_steps.py` (TOKEN_MAP) | Diccionario que mapea tipos de tokens del DSL ('valid', 'admin', 'user', 'invalid', 'none') a tokens reales de la API |
 | **Configuración de URL de API** | `features/steps/environment.py` (VHAPE_API_URL) | Variable de entorno que define la URL base de la API (por defecto: http://localhost:8000) |
 | **Configuración de URL de API** | `features/steps/auth_steps.py` (API_BASE_URL) | Variable de entorno que define la URL base de la API para las peticiones HTTP en los steps |
@@ -84,7 +84,7 @@
         │ 4. Ejecutar Tests                         │
         │    - Opción A:                            │
         │      python tests/e2e/                    │
-        │        run_tests_and_generate_report.py   │
+        │        run_e2e_tests.py                   │
         │    - Opción B:                            │
         │      behave features/                     │
         └───────────────────────────────────────────┘
@@ -255,8 +255,7 @@
                                     │
                                     ▼
         ┌───────────────────────────────────────────┐
-        │ 19. Si se usó run_tests_and_generate_     │
-        │     report.py:                            │
+        │ 19. Si se usó run_e2e_tests.py:          │
         │     - Parsea output de Behave             │
         │     - Mejora reporte con datos adicionales│
         │     - Muestra resumen mejorado            │
@@ -275,7 +274,7 @@
 ### Flujo Principal:
 1. **Configuración** → Usuario define URL de API y tokens en `auth_steps.py`
 2. **Inicio API** → Se inicia la API dummy con Uvicorn (opcional, puede estar corriendo)
-3. **Ejecución** → Se ejecuta `run_tests_and_generate_report.py` o `behave` directamente
+3. **Ejecución** → Se ejecuta `run_e2e_tests.py` o `behave` directamente
 4. **Behave** → Lee `.feature` files y ejecuta steps definidos en `auth_steps.py`
 5. **Parser DSL** → Cada step Given/When/Then es parseado por `parse.py` usando `grammar.lark`
 6. **HTTP Requests** → Los steps When envían requests a la API usando `requests`

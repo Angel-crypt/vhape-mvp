@@ -69,7 +69,7 @@ The API will be available at `http://localhost:8000` with interactive documentat
 
 ```bash
 # Run all tests and generate reports (recommended)
-python tests/e2e/run_tests_and_generate_report.py
+python tests/e2e/run_e2e_tests.py
 
 # Or run Behave directly
 behave features/
@@ -198,7 +198,7 @@ Feature: My API Security Tests
 **Run all tests with report generation (recommended):**
 
 ```bash
-python tests/e2e/run_tests_and_generate_report.py
+python tests/e2e/run_e2e_tests.py
 ```
 
 **Run a specific feature file:**
@@ -220,7 +220,7 @@ behave --tags=@smoke     # Run only smoke tests
 behave --tags=@security  # Run only security tests
 ```
 
-> **Note:** The `behave.ini` configuration file is located in `vhape/` directory. The script `run_tests_and_generate_report.py` automatically handles copying it to the project root when needed. For direct `behave` commands from the project root, you may need to temporarily copy `vhape/behave.ini` to the root, or run `behave` from the `vhape/` directory.
+> **Note:** The `behave.ini` configuration file is located in `vhape/` directory. The script `run_e2e_tests.py` automatically handles copying it to the project root when needed. For direct `behave` commands from the project root, you may need to temporarily copy `vhape/behave.ini` to the root, or run `behave` from the `vhape/` directory.
 
 ### Step 5: Review Results
 
@@ -320,7 +320,7 @@ The core framework provides the DSL parser and reporting system.
 
 ```bash
 # Run all tests with report generation (recommended)
-python tests/e2e/run_tests_and_generate_report.py
+python tests/e2e/run_e2e_tests.py
 
 # Run specific feature
 behave features/auth.feature
