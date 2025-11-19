@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 from datetime import datetime, timedelta
 
+
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
@@ -108,7 +109,19 @@ def extract_features_and_scenarios(output: str) -> list:
 
 
 def main():
-    """Ejecuta tests y genera reporte."""
+    """
+    Ejecuta todos los tests e2e y genera reporte.
+    
+    Ejecuta todas las features en el directorio features/, incluyendo:
+    - auth.feature: Tests de autenticación básicos
+    - api_security.feature: Tests de seguridad de API
+    - edge_cases.feature: Casos límite
+    - failure_scenarios.feature: Escenarios que fallan intencionalmente (para probar el sistema de reportes)
+    - workflow.feature: Flujos de trabajo completos
+    
+    Nota: Algunos escenarios en failure_scenarios.feature están diseñados para fallar
+    y esto es esperado. El sistema de reportes debe capturar tanto éxitos como fallos.
+    """
     project_root = Path(__file__).parent.parent.parent
     os.chdir(project_root)
     
@@ -118,7 +131,9 @@ def main():
     print()
     
     # Ejecutar behave y capturar output
-    print("🔍 Ejecutando tests de Behave...")
+    # Esto ejecutará TODAS las features en features/, incluyendo las que fallan intencionalmente
+    print("[INFO] Ejecutando tests de Behave (todas las features)...")
+    print("[INFO] Nota: Algunos escenarios en failure_scenarios.feature fallan intencionalmente.")
     print()
     
     # Behave searches for behave.ini in current directory and parent directories
@@ -132,6 +147,9 @@ def main():
         shutil.copy2(behave_ini_source, behave_ini_temp)
     
     try:
+        # Execute all features, including failure scenarios
+        # --no-capture: Show output in real-time
+        # stop=False is already set in behave.ini, so it won't stop on first failure
         result = subprocess.run(
             [sys.executable, '-m', 'behave', 'features/', '--no-capture'],
             cwd=project_root,
@@ -234,7 +252,7 @@ def main():
         # Look for security-related error messages in the output
         seen_issues = set()  # Avoid duplicates
         for line in output.split('\n'):
-            if '❌' in line and ('insecure' in line.lower() or 'validation failed' in line.lower()):
+            if '[FAIL]' in line and ('insecure' in line.lower() or 'validation failed' in line.lower()):
                 # Extract security issue from error message
                 if 'Token validation failed' in line and 'Token validation failed' not in seen_issues:
                     summary.add_security_issue('Token validation failed when it should have passed', 'Failed step', 'high')
@@ -261,7 +279,7 @@ def main():
     # Solo guardar un nuevo JSON si creamos el summary desde el parsing
     if summary_json_file and summary_json_file.stat().st_mtime > (datetime.now().timestamp() - 10):
         # Ya tenemos el JSON con los security issues, solo informar
-        print(f"💾 JSON Report (with security issues): {summary_json_file}")
+        print(f"[SAVE] JSON Report (with security issues): {summary_json_file}")
         print()
     else:
         # Guardar JSON desde el parsing (fallback)
@@ -269,7 +287,7 @@ def main():
         results_dir.mkdir(parents=True, exist_ok=True)
         json_file = summary.save_json(results_dir / f"summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
         
-        print(f"💾 JSON Report saved to: {json_file}")
+        print(f"[SAVE] JSON Report saved to: {json_file}")
         print()
     
     return result.returncode
