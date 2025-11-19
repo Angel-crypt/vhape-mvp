@@ -377,6 +377,8 @@ Examples:
         
         # Crear summary desde el JSON
         summary = TestSummary()
+        # Parse timestamps - assume they are in local timezone (naive datetimes)
+        # fromisoformat() will create a naive datetime which is interpreted as local time
         summary.start_time = datetime.fromisoformat(json_data['start_time'])
         summary.end_time = datetime.fromisoformat(json_data['end_time']) if json_data.get('end_time') else None
         
