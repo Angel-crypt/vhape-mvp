@@ -8,6 +8,9 @@ services:
     container_name: api_dummy
     ports:
       - "8000:8000"
+    environment:
+      # Set timezone to match host (Central Standard Time Mexico = America/Mexico_City)
+      - TZ=America/Mexico_City
     networks:
       - vhape-net
     healthcheck:
@@ -29,6 +32,8 @@ services:
     environment:
       - VHAPE_API_URL=http://api_dummy:8000
       - RESULTS_DIR=/app/tests/results
+      # Set timezone to match host (Central Standard Time Mexico = America/Mexico_City)
+      - TZ=America/Mexico_City
     volumes:
       # Mount results directory for persistence
       - ./tests/results:/app/tests/results

@@ -7,9 +7,11 @@
 # Base image: Python 3.11 slim (minimal size)
 FROM python:3.11-slim
 
-# Install curl for health checks in entrypoint
-RUN apt-get update && apt-get install -y --no-install-recommends curl && \
-    rm -rf /var/lib/apt/lists/*
+# Install curl and tzdata for timezone support
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory inside container
 WORKDIR /app
@@ -37,6 +39,10 @@ ENV VHAPE_API_URL=http://api_dummy:8000
 
 # RESULTS_DIR: Directory where test results will be stored
 ENV RESULTS_DIR=/app/tests/results
+
+# Set timezone (will be overridden by docker-compose to match host)
+# Default to UTC, but docker-compose will set it to match host timezone
+ENV TZ=UTC
 
 # Define volume for test results (allows persistence outside container)
 VOLUME ["/app/tests/results"]
