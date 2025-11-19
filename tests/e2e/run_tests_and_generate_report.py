@@ -1,19 +1,3 @@
-#!/usr/bin/env python3
-"""
-Script principal para ejecutar tests de Behave y generar reportes.
-
-Este script:
-1. Ejecuta los tests de Behave
-2. Captura y parsea los resultados
-3. Genera un reporte completo en JSON
-4. Muestra un resumen en consola
-
-Uso:
-    python test/run_tests_and_generate_report.py
-    # o
-    ./test/run_tests_and_generate_report.py
-"""
-
 import sys
 import os
 import subprocess
