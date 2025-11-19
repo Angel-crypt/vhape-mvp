@@ -1,0 +1,7 @@
+# API Dummy Dependencies
+# FastAPI web framework
+fastapi==0.119.1
+
+# ASGI server to run FastAPI
+uvicorn==0.38.0
+

@@ -610,6 +610,129 @@ venv\Scripts\activate     # Windows
 
 ---
 
+## Docker Execution Guide
+
+Vhape can be run entirely in Docker containers, making it easy to set up and run tests without installing dependencies locally.
+
+### Prerequisites
+
+- Docker Engine 20.10+
+- Docker Compose 2.0+
+
+### Quick Start
+
+**1. Build the Docker images:**
+
+```bash
+docker-compose build
+```
+
+**2. Start services in detached mode:**
+
+```bash
+docker-compose up -d
+```
+
+This will start:
+
+- `api_dummy` service on port 8000
+- `bjparser` service (ready to execute tests)
+
+**3. Run tests:**
+
+```bash
+# Run all E2E tests
+docker-compose run --rm bjparser python tests/e2e/run_e2e_tests.py --all
+
+# Run specific features
+docker-compose run --rm bjparser python tests/e2e/run_e2e_tests.py --features auth
+
+# Run behave directly
+docker-compose run --rm bjparser behave
+
+# Interactive shell (for debugging)
+docker-compose run --rm bjparser
+```
+
+**4. View results:**
+
+Test results are automatically saved to `./tests/results/`:
+
+- JSON reports: `./tests/results/summary_YYYYMMDD_HHMMSS.json`
+- HTML reports: `./tests/results/summary_YYYYMMDD_HHMMSS.html`
+
+**5. Cleanup:**
+
+```bash
+# Stop and remove containers
+docker-compose down
+
+# Stop and remove containers + volumes
+docker-compose down -v
+```
+
+### Docker Services
+
+**api_dummy:**
+
+- FastAPI dummy API server
+- Exposed on port 8000
+- Health check endpoint: `/api/health`
+
+**bjparser:**
+
+- Vhape parser and Behave runner
+- Waits for API dummy to be ready before executing
+- Mounts `./tests/results` for persistent reports
+- Supports interactive mode for debugging
+
+### Environment Variables
+
+Create a `.env` file (or use `.env.example` as a template):
+
+```bash
+VHAPE_API_URL=http://api_dummy:8000
+RESULTS_DIR=./tests/results
+```
+
+### Troubleshooting
+
+**API not ready:**
+The bjparser container automatically waits up to 30 seconds for the API to be ready. If you see connection errors, check:
+
+```bash
+# Check API health
+docker-compose exec api_dummy curl http://localhost:8000/api/health
+
+# View API logs
+docker-compose logs api_dummy
+```
+
+**Results not appearing:**
+Ensure the `./tests/results` directory exists and is writable:
+
+```bash
+mkdir -p tests/results
+chmod 755 tests/results
+```
+
+**Interactive debugging:**
+Access an interactive shell in the bjparser container:
+
+```bash
+docker-compose run --rm bjparser
+# Inside container:
+python tests/e2e/run_e2e_tests.py --all
+behave
+python -c "import requests; print(requests.get('http://api_dummy:8000/api/health').status_code)"
+```
+
+### Important Notes
+
+⚠️ **Warning:** The dummy API uses hardcoded test tokens (`valid-token`, `user-token`) and is **NOT suitable for production use**. It is designed solely for testing the Vhape BDD framework.
+
+---
+
 ## Documentation
 
 - **[DSL Syntax Guide](docs/dsl-syntax.md)** - Complete DSL syntax reference
