@@ -3,6 +3,7 @@ import os
 import subprocess
 import json
 import re
+import argparse
 from pathlib import Path
 from datetime import datetime, timedelta
 
@@ -13,6 +14,107 @@ sys.path.insert(0, str(project_root))
 
 from vhape.reporting.summary import TestSummary
 from tests.e2e.html_report_generator import generate_html_report
+
+
+def get_available_features(project_root: Path) -> list:
+    """Get list of available feature files."""
+    features_dir = project_root / 'features'
+    feature_files = sorted(features_dir.glob('*.feature'))
+    return [f.name for f in feature_files]
+
+
+def select_features_interactive(project_root: Path) -> list:
+    """
+    Interactive menu to select which features to run.
+    
+    Returns:
+        List of feature file paths to execute, or None for all features
+    """
+    available_features = get_available_features(project_root)
+    
+    if not available_features:
+        print("[WARN] No feature files found in features/ directory")
+        return None
+    
+    print("\n" + "=" * 60)
+    print("  Select Features to Run")
+    print("=" * 60)
+    print()
+    print("Available features:")
+    print()
+    
+    # Display features with numbers
+    for idx, feature in enumerate(available_features, 1):
+        print(f"  [{idx}] {feature}")
+    
+    print()
+    print("Options:")
+    print("  [0]  Run ALL features")
+    print(f"  [1-{len(available_features)}] Select specific feature(s) (comma-separated, e.g., 1,3,5)")
+    print("  [q]  Quit")
+    print()
+    print("Examples:")
+    print("  - Enter '0' to run all features")
+    print("  - Enter '1' to run only the first feature")
+    print("  - Enter '1,3,5' to run features 1, 3, and 5")
+    print()
+    
+    while True:
+        try:
+            choice = input("Enter your choice: ").strip().lower()
+            
+            if choice == 'q' or choice == 'quit':
+                print("[INFO] Exiting...")
+                sys.exit(0)
+            
+            if choice == '0' or choice == 'all':
+                print("\n[INFO] Selected: ALL features")
+                return None  # None means run all
+            
+            # Parse comma-separated numbers
+            selected_indices = []
+            invalid_selections = []
+            
+            for part in choice.split(','):
+                part = part.strip()
+                if part:
+                    try:
+                        idx = int(part)
+                        if 1 <= idx <= len(available_features):
+                            # Avoid duplicates
+                            idx_0_based = idx - 1
+                            if idx_0_based not in selected_indices:
+                                selected_indices.append(idx_0_based)
+                        else:
+                            invalid_selections.append(part)
+                    except ValueError:
+                        invalid_selections.append(part)
+            
+            # Check for invalid selections
+            if invalid_selections:
+                print(f"[ERROR] Invalid selection(s): {', '.join(invalid_selections)}")
+                print(f"[INFO] Please choose numbers between 1-{len(available_features)}")
+                continue
+            
+            # All indices were valid
+            if selected_indices:
+                # Sort indices to maintain order
+                selected_indices.sort()
+                selected_features = [available_features[i] for i in selected_indices]
+                print(f"\n[INFO] Selected {len(selected_features)} feature(s):")
+                for feature in selected_features:
+                    print(f"  - {feature}")
+                return selected_features
+            else:
+                print("[ERROR] No valid features selected. Please try again.")
+        
+        except ValueError:
+            print("[ERROR] Invalid input. Please enter numbers separated by commas, '0' for all, or 'q' to quit.")
+        except KeyboardInterrupt:
+            print("\n\n[INFO] Interrupted by user. Exiting...")
+            sys.exit(0)
+        except Exception as e:
+            print(f"[ERROR] An error occurred: {e}. Please try again.")
 
 
 def parse_behave_output(output: str) -> dict:
@@ -110,17 +212,96 @@ def extract_features_and_scenarios(output: str) -> list:
 
 
 def main():
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        description='Vhape E2E Test Runner - Execute BDD tests and generate reports',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python run_e2e_tests.py                    # Interactive mode
+  python run_e2e_tests.py --all              # Run all features
+  python run_e2e_tests.py --features auth    # Run auth.feature
+  python run_e2e_tests.py --features auth,api_security  # Run multiple features
+        """
+    )
+    parser.add_argument(
+        '--all', '-a',
+        action='store_true',
+        help='Run all features (skip interactive menu)'
+    )
+    parser.add_argument(
+        '--features', '-f',
+        type=str,
+        help='Comma-separated list of feature names to run (e.g., auth,api_security)'
+    )
+    parser.add_argument(
+        '--interactive', '-i',
+        action='store_true',
+        help='Force interactive mode (default if no other options)'
+    )
+    
+    args = parser.parse_args()
+    
     project_root = Path(__file__).parent.parent.parent
     os.chdir(project_root)
     
     print("=" * 60)
     print("  VHAPE - Ejecutando Tests y Generando Reportes")
     print("=" * 60)
+    
+    # Determine which features to run
+    selected_features = None
+    
+    if args.all:
+        # Run all features
+        print("\n[INFO] Selected: ALL features (--all flag)")
+        selected_features = None
+    elif args.features:
+        # Parse feature names from command line
+        feature_names = [f.strip() for f in args.features.split(',')]
+        available_features = get_available_features(project_root)
+        
+        # Validate feature names
+        valid_features = []
+        for name in feature_names:
+            # Try exact match first
+            if name in available_features:
+                valid_features.append(name)
+            # Try with .feature extension
+            elif f"{name}.feature" in available_features:
+                valid_features.append(f"{name}.feature")
+            else:
+                print(f"[WARN] Feature '{name}' not found. Available features: {', '.join(available_features)}")
+        
+        if valid_features:
+            selected_features = valid_features
+            print(f"\n[INFO] Selected {len(selected_features)} feature(s) from command line:")
+            for feature in selected_features:
+                print(f"  - {feature}")
+        else:
+            print("[ERROR] No valid features specified. Exiting...")
+            sys.exit(1)
+    else:
+        # Interactive mode (default)
+        selected_features = select_features_interactive(project_root)
+    
+    print()
+    print("=" * 60)
+    print("  VHAPE - Ejecutando Tests y Generando Reportes")
+    print("=" * 60)
     print()
     
-    # Ejecutar behave y capturar output
-    # Esto ejecutará TODAS las features en features/, incluyendo las que fallan intencionalmente
-    print("[INFO] Ejecutando tests de Behave ...")
+    # Build behave command
+    if selected_features is None:
+        # Run all features
+        behave_args = ['features/']
+        print("[INFO] Ejecutando tests de Behave (todas las features)...")
+    else:
+        # Run selected features
+        feature_paths = [f'features/{f}' for f in selected_features]
+        behave_args = feature_paths
+        print(f"[INFO] Ejecutando tests de Behave ({len(selected_features)} feature(s) seleccionada(s))...")
+    
     print()
     
     # Behave searches for behave.ini in current directory and parent directories
@@ -134,11 +315,12 @@ def main():
         shutil.copy2(behave_ini_source, behave_ini_temp)
     
     try:
-        # Execute all features, including failure scenarios
+        # Execute selected features
         # --no-capture: Show output in real-time
         # stop=False is already set in behave.ini, so it won't stop on first failure
+        cmd = [sys.executable, '-m', 'behave', '--no-capture'] + behave_args
         result = subprocess.run(
-            [sys.executable, '-m', 'behave', 'features/', '--no-capture'],
+            cmd,
             cwd=project_root,
             capture_output=True,
             text=True

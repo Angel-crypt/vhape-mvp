@@ -15,7 +15,10 @@ Vhape provides a minimalistic framework to **validate REST API authentication an
 - **Simple DSL:** Use plain phrases like `valid token`, `expect 401`, `access denied`.
 - **BDD with Behave:** Write and execute structured scenarios.
 - **Multiple Scenarios Support:** Test several authentication cases in a single file.
-- **Clear Reporting:** Get understandable feedback about API security with JSON reports.
+- **Interactive Test Runner:** Select which features to run with an intuitive menu or command-line options.
+- **Modern HTML Reports:** Beautiful, interactive web-based reports with search and filter capabilities.
+- **JSON Reports:** Machine-readable reports for CI/CD integration.
+- **Comprehensive Unit Tests:** 94+ unit tests covering parser, reporting, and core logic.
 - **Modular & Extensible:** Parser, steps, and features are organized for future growth.
 
 ---
@@ -67,12 +70,35 @@ The API will be available at `http://localhost:8000` with interactive documentat
 
 ### 5. Run Tests
 
-```bash
-# Run all tests and generate reports (recommended)
-python tests/e2e/run_e2e_tests.py
+**Interactive Mode (Recommended):**
 
-# Or run Behave directly
+```bash
+# Interactive menu to select which features to run
+python tests/e2e/run_e2e_tests.py
+```
+
+**Command Line Options:**
+
+```bash
+# Run all features (skip interactive menu)
+python tests/e2e/run_e2e_tests.py --all
+
+# Run specific features
+python tests/e2e/run_e2e_tests.py --features auth
+python tests/e2e/run_e2e_tests.py --features auth,api_security
+
+# See all options
+python tests/e2e/run_e2e_tests.py --help
+```
+
+**Direct Behave Execution:**
+
+```bash
+# Run all features directly with Behave
 behave features/
+
+# Run specific feature
+behave features/auth.feature
 ```
 
 > 📖 **For test execution details and reports**, see [`tests/results/README.md`](tests/results/README.md)
@@ -173,6 +199,7 @@ Feature: My API Security Tests
 ### Step 3: Understanding DSL Keywords
 
 **Given (Setup):**
+
 - `I have a valid token` - Use a valid authentication token
 - `I have an admin token` - Use an admin-level token
 - `I have a user token` - Use a user-level token
@@ -180,9 +207,11 @@ Feature: My API Security Tests
 - `I have no token` - Don't send any token
 
 **When (Action):**
+
 - `I send a request to "/your/endpoint"` - Send HTTP request to the endpoint
 
 **Then (Validation):**
+
 - `the response should validate token` - Expect 200 OK with valid response
 - `the response should expect 401` - Expect 401 Unauthorized
 - `the response should access denied` - Expect 403 Forbidden (access denied)
@@ -195,61 +224,149 @@ Feature: My API Security Tests
 
 ### Step 4: Run Your Tests
 
-**Run all tests with report generation (recommended):**
+The `run_e2e_tests.py` script provides an interactive and flexible way to run your tests.
+
+#### Interactive Mode (Default)
+
+When you run the script without arguments, it shows an interactive menu:
 
 ```bash
 python tests/e2e/run_e2e_tests.py
 ```
 
-**Run a specific feature file:**
+**Interactive Menu Options:**
+
+- `[0]` - Run ALL features
+- `[1-N]` - Select specific feature(s) by number (comma-separated, e.g., `1,3,5`)
+- `[q]` - Quit
+
+**Example Interactive Session:**
+
+```
+============================================================
+  Select Features to Run
+============================================================
+
+Available features:
+
+  [1] api_security.feature
+  [2] auth.feature
+  [3] edge_cases.feature
+  [4] failure_scenarios.feature
+  [5] workflow.feature
+
+Options:
+  [0]  Run ALL features
+  [1-5] Select specific feature(s) (comma-separated, e.g., 1,3,5)
+  [q]  Quit
+
+Enter your choice: 1,2
+```
+
+#### Command Line Options
+
+**Run all features (skip menu):**
 
 ```bash
+python tests/e2e/run_e2e_tests.py --all
+# or
+python tests/e2e/run_e2e_tests.py -a
+```
+
+**Run specific features:**
+
+```bash
+# Single feature
+python tests/e2e/run_e2e_tests.py --features auth
+python tests/e2e/run_e2e_tests.py -f auth
+
+# Multiple features
+python tests/e2e/run_e2e_tests.py --features auth,api_security
+python tests/e2e/run_e2e_tests.py -f auth,workflow
+```
+
+**View help:**
+
+```bash
+python tests/e2e/run_e2e_tests.py --help
+```
+
+#### Direct Behave Execution
+
+You can also run Behave directly:
+
+```bash
+# Run all features
+behave features/
+
+# Run specific feature
 behave features/my_api_security.feature
-```
 
-**Run with verbose output:**
-
-```bash
+# Run with verbose output
 behave features/my_api_security.feature --no-capture
-```
 
-**Run by tags (if you add tags to scenarios):**
-
-```bash
+# Run by tags
 behave --tags=@smoke     # Run only smoke tests
 behave --tags=@security  # Run only security tests
+behave --tags=@negative  # Run failure scenarios
 ```
 
 > **Note:** The `behave.ini` configuration file is located in `vhape/` directory. The script `run_e2e_tests.py` automatically handles copying it to the project root when needed. For direct `behave` commands from the project root, you may need to temporarily copy `vhape/behave.ini` to the root, or run `behave` from the `vhape/` directory.
 
 ### Step 5: Review Results
 
-After running tests, you'll see:
+After running tests with `run_e2e_tests.py`, you'll get:
 
 1. **Console Output:**
+
    ```
    ============================================================
      VHAPE - Security Test Summary
    ============================================================
    
-   📋 Features:   Total: 1, ✅ Passed: 1, ❌ Failed: 0
-   🎯 Scenarios:  Total: 4, ✅ Passed: 4, ❌ Failed: 0
-   📝 Steps:      Total: 12, ✅ Passed: 12, ❌ Failed: 0
-   ⚠️  Security Issues: 0
+   Features:
+      Total:    1
+      [OK] Passed: 1
+      [FAIL] Failed: 0
    
-   📊 Success Rate: 100.0%
-   ⏱️  Duration: 1.23s
+   Scenarios:
+      Total:    4
+      [OK] Passed: 4
+      [FAIL] Failed: 0
+   
+   Steps:
+      Total:    12
+      [OK] Passed: 12
+      [FAIL] Failed: 0
+   
+   [OK] No security issues detected
+   
+   Success Rate: 100.0%
+   Duration: 1.23s
    ```
 
 2. **JSON Report:**
    - Location: `tests/results/summary_YYYYMMDD_HHMMSS.json`
    - Contains detailed test results, security issues, and statistics
+   - Machine-readable format for CI/CD integration
+
+3. **HTML Report (Automatically Generated):**
+   - Location: `tests/results/summary_YYYYMMDD_HHMMSS.html`
+   - Modern, interactive web-based report
+   - Automatically opens in your default browser
+   - Features:
+     - Visual statistics dashboard
+     - Search and filter functionality
+     - Detailed feature and scenario breakdown
+     - Security issues highlighting
+     - Responsive design (mobile-friendly)
 
 ### Step 6: Customize for Your API
 
 If your API uses different authentication (e.g., API keys, custom headers), you'll need to:
 
 1. **Update token mapping** in `features/steps/auth_steps.py`:
+
    ```python
    TOKEN_MAP = {
        'valid': 'your-valid-token',
@@ -316,11 +433,34 @@ The core framework provides the DSL parser and reporting system.
 
 ## Test Execution
 
-### Running Tests
+### Running E2E Tests
+
+**Interactive Mode (Recommended):**
 
 ```bash
-# Run all tests with report generation (recommended)
+# Shows interactive menu to select features
 python tests/e2e/run_e2e_tests.py
+```
+
+**Command Line Options:**
+
+```bash
+# Run all features (skip menu)
+python tests/e2e/run_e2e_tests.py --all
+
+# Run specific features
+python tests/e2e/run_e2e_tests.py --features auth
+python tests/e2e/run_e2e_tests.py --features auth,api_security,workflow
+
+# View help
+python tests/e2e/run_e2e_tests.py --help
+```
+
+**Direct Behave Execution:**
+
+```bash
+# Run all features
+behave features/
 
 # Run specific feature
 behave features/auth.feature
@@ -331,16 +471,40 @@ behave features/failure_scenarios.feature
 # Run by tags
 behave --tags=@negative  # Run failure scenarios
 behave --tags=@smoke     # Run smoke tests only
+behave --tags=@security  # Run security tests
+```
 
-# Run parser unit tests (requires pytest)
+### Running Unit Tests
+
+```bash
+# Run all unit tests
+pytest tests/unit/ -v
+
+# Run specific test file
 pytest tests/unit/test_parser.py -v
+pytest tests/unit/test_summary.py -v
+pytest tests/unit/test_auth_steps.py -v
+
+# Run with coverage
+pytest tests/unit/ --cov=vhape --cov-report=html
 ```
 
 ### Test Reports
 
-Reports are automatically generated in `tests/results/` directory with JSON format.
+Reports are automatically generated in `tests/results/` directory:
 
-**See:** [`tests/results/README.md`](tests/results/README.md) for report format and usage.
+1. **JSON Report** (`summary_YYYYMMDD_HHMMSS.json`):
+   - Machine-readable format
+   - Contains detailed test results, security issues, and statistics
+   - Suitable for CI/CD integration
+
+2. **HTML Report** (`summary_YYYYMMDD_HHMMSS.html`):
+   - Modern, interactive web-based report
+   - Automatically opens in your default browser
+   - Features search, filters, and visual statistics
+   - Responsive design for all devices
+
+**See:** [`tests/results/README.md`](tests/results/README.md) for detailed report format and usage.
 
 ### Testing Failure Reporting
 
@@ -349,24 +513,47 @@ The project includes intentionally failing scenarios to verify that the reportin
 **Run failure scenarios:**
 
 ```bash
+# Using the interactive runner
+python tests/e2e/run_e2e_tests.py
+# Then select option 4 (failure_scenarios.feature)
+
+# Or using command line
+python tests/e2e/run_e2e_tests.py --features failure_scenarios
+
+# Or directly with Behave
 behave features/failure_scenarios.feature
 # or
 behave --tags=@negative
 ```
 
 This will execute 8 scenarios that intentionally fail, showing:
-- ❌ Failed scenarios in the summary
-- ⚠️ Security issues detected
-- 📊 Success rate calculation with failures
-- 📝 Detailed error messages in reports
+
+- [FAIL] Failed scenarios in the summary
+- [WARN] Security issues detected
+- Success rate calculation with failures
+- Detailed error messages in reports
 
 **Example failure report output:**
 
 ```
-📋 Features:   Total: 5, ✅ Passed: 4, ❌ Failed: 1
-🎯 Scenarios:  Total: 36, ✅ Passed: 28, ❌ Failed: 8
-📝 Steps:      Total: 108, ✅ Passed: 100, ❌ Failed: 8
-📊 Success Rate: 77.8%
+Features:
+   Total:    5
+   [OK] Passed: 4
+   [FAIL] Failed: 1
+
+Scenarios:
+   Total:    36
+   [OK] Passed: 28
+   [FAIL] Failed: 8
+
+Steps:
+   Total:    108
+   [OK] Passed: 100
+   [FAIL] Failed: 8
+
+[WARN] Security Issues Found: 8
+
+Success Rate: 77.8%
 ```
 
 ---
