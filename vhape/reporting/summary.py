@@ -107,36 +107,36 @@ class TestSummary:
         print("=" * 60)
         
         # Features
-        print(f"\n📋 Features:")
+        print(f"\nFeatures:")
         print(f"   Total:    {stats['features']['total']}")
-        print(f"   ✅ Passed: {stats['features']['passed']}")
-        print(f"   ❌ Failed: {stats['features']['failed']}")
+        print(f"   [OK] Passed: {stats['features']['passed']}")
+        print(f"   [FAIL] Failed: {stats['features']['failed']}")
         
         # Scenarios
-        print(f"\n🎯 Scenarios:")
+        print(f"\nScenarios:")
         print(f"   Total:    {stats['scenarios']['total']}")
-        print(f"   ✅ Passed: {stats['scenarios']['passed']}")
-        print(f"   ❌ Failed: {stats['scenarios']['failed']}")
+        print(f"   [OK] Passed: {stats['scenarios']['passed']}")
+        print(f"   [FAIL] Failed: {stats['scenarios']['failed']}")
         
         # Steps
-        print(f"\n📝 Steps:")
+        print(f"\nSteps:")
         print(f"   Total:    {stats['steps']['total']}")
-        print(f"   ✅ Passed: {stats['steps']['passed']}")
-        print(f"   ❌ Failed: {stats['steps']['failed']}")
+        print(f"   [OK] Passed: {stats['steps']['passed']}")
+        print(f"   [FAIL] Failed: {stats['steps']['failed']}")
         
         # Security Issues
         if stats['security_issues'] > 0:
-            print(f"\n⚠️  Security Issues Found: {stats['security_issues']}")
+            print(f"\n[WARN] Security Issues Found: {stats['security_issues']}")
             for issue in self.security_issues:
-                print(f"   ❌ {issue['message']} (Step: {issue['step']})")
+                print(f"   [FAIL] {issue['message']} (Step: {issue['step']})")
         else:
-            print(f"\n✅ No security issues detected")
+            print(f"\n[OK] No security issues detected")
         
         # Success Rate
-        print(f"\n📊 Success Rate: {stats['success_rate']:.1f}%")
+        print(f"\nSuccess Rate: {stats['success_rate']:.1f}%")
         
         # Duration
-        print(f"\n⏱️  Duration: {stats['duration']:.2f}s")
+        print(f"\nDuration: {stats['duration']:.2f}s")
         
         print("\n" + "=" * 60 + "\n")
     
