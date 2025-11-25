@@ -108,7 +108,7 @@ All detailed documentation is available in the [`docs/`](docs/) directory:
 - **[Vhape Framework](docs/README_vhape.md)** - Core framework, parser architecture, and reporting system
 - **[API Dummy](docs/README_api_dummy.md)** - Dummy API endpoints, Docker setup, and Postman collections
 - **[Testing Guide](docs/README_tests_unit.md)** - Unit tests, E2E tests, and test results documentation
-- **[Project Structure](docs/README_vhape.md#module-structure)** - Detailed project organization
+- **[Project Structure](docs/README_project_structure.md)** - Detailed project organization
 
 ---
 
