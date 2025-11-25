@@ -1,36 +1,36 @@
-# Vhape DSL - Sintaxis Mínima
+# Vhape DSL - Syntax Guide
 
-## Visión General
+## Overview
 
-El DSL de Vhape está basado en Gherkin y permite describir escenarios de seguridad de APIs de forma simple y natural. Está diseñado para usuarios no técnicos que necesitan validar la seguridad de sus APIs.
+The Vhape DSL is based on Gherkin and allows you to describe API security scenarios in a simple and natural way. It's designed for non-technical users who need to validate their API security.
 
-## Estructura Básica
+## Basic Structure
 
-### Feature (Característica)
+### Feature
 
-Describe qué funcionalidad se está probando.
-
-```gherkin
-Feature: Nombre de la característica
-  Descripción opcional de la característica
-```
-
-### Scenario (Escenario)
-
-Describe un caso de prueba específico.
+Describes what functionality is being tested.
 
 ```gherkin
-Scenario: Nombre del escenario
-  Pasos del escenario
+Feature: Feature Name
+  Optional feature description
 ```
 
-## Keywords DSL Principales
+### Scenario
+
+Describes a specific test case.
+
+```gherkin
+Scenario: Scenario Name
+  Scenario steps
+```
+
+## Main DSL Keywords
 
 ### 1. `validate token`
 
-Valida que un token de autenticación es válido.
+Validates that an authentication token is valid.
 
-**Ejemplo:**
+**Example:**
 
 ```gherkin
 Given I have a valid token
@@ -40,9 +40,9 @@ Then the response should validate token
 
 ### 2. `expect 401`
 
-Verifica que la respuesta es 401 Unauthorized.
+Verifies that the response is 401 Unauthorized.
 
-**Ejemplo:**
+**Example:**
 
 ```gherkin
 Given I have no token
@@ -50,7 +50,7 @@ When I send a request to "/api/users/me"
 Then the response should expect 401
 ```
 
-O con token inválido:
+Or with invalid token:
 
 ```gherkin
 Given I have an invalid token
@@ -60,9 +60,9 @@ Then the response should expect 401
 
 ### 3. `access denied`
 
-Verifica que la respuesta es 403 Forbidden (acceso denegado).
+Verifies that the response is 403 Forbidden (access denied).
 
-**Ejemplo:**
+**Example:**
 
 ```gherkin
 Given I have a user token
@@ -72,9 +72,9 @@ Then the response should access denied
 
 ### 4. `access allowed`
 
-Verifica que la respuesta es 200 OK (acceso permitido).
+Verifies that the response is 200 OK (access allowed).
 
-**Ejemplo:**
+**Example:**
 
 ```gherkin
 Given I have an admin token
@@ -82,20 +82,20 @@ When I send a request to "/api/admin/users"
 Then the response should access allowed
 ```
 
-## Estructura de Pasos
+## Step Structure
 
-### Given (Dado)
+### Given
 
-Define el estado inicial o contexto.
+Defines the initial state or context.
 
-**Tokens disponibles:**
+**Available tokens:**
 
-- `valid token` / `admin token` - Token válido con rol admin
-- `user token` - Token válido con rol usuario
-- `invalid token` - Token inválido
-- `no token` / `missing token` - Sin token
+- `valid token` / `admin token` - Valid token with admin role
+- `user token` - Valid token with user role
+- `invalid token` - Invalid token
+- `no token` / `missing token` - No token
 
-**Ejemplos:**
+**Examples:**
 
 ```gherkin
 Given I have a valid token
@@ -105,41 +105,41 @@ Given I have an invalid token
 Given I have no token
 ```
 
-### When (Cuando)
+### When
 
-Define la acción a realizar.
+Defines the action to perform.
 
-**Formato:**
+**Format:**
 
 ```gherkin
 When I send a request to "<endpoint>"
 ```
 
-**Ejemplos:**
+**Examples:**
 
 ```gherkin
 When I send a request to "/api/users/me"
 When I send a request to "/api/admin/users"
 ```
 
-### Then (Entonces)
+### Then
 
-Define el resultado esperado.
+Defines the expected result.
 
-**Formato:**
+**Format:**
 
 ```gherkin
 Then the response should <keyword>
 ```
 
-**Keywords disponibles:**
+**Available keywords:**
 
-- `validate token` - Token válido (200 OK)
-- `expect 401` - No autorizado (401)
-- `access denied` - Acceso denegado (403)
-- `access allowed` - Acceso permitido (200 OK)
+- `validate token` - Valid token (200 OK)
+- `expect 401` - Unauthorized (401)
+- `access denied` - Access denied (403)
+- `access allowed` - Access allowed (200 OK)
 
-**Ejemplos:**
+**Examples:**
 
 ```gherkin
 Then the response should validate token
@@ -148,9 +148,9 @@ Then the response should access denied
 Then the response should access allowed
 ```
 
-## Ejemplos Completos
+## Complete Examples
 
-### Ejemplo 1: Validar Token
+### Example 1: Validate Token
 
 ```gherkin
 Feature: User Authentication
@@ -164,7 +164,7 @@ Feature: User Authentication
     Then the response should validate token
 ```
 
-### Ejemplo 2: Token Inválido
+### Example 2: Invalid Token
 
 ```gherkin
   Scenario: Invalid token should return 401
@@ -173,7 +173,7 @@ Feature: User Authentication
     Then the response should expect 401
 ```
 
-### Ejemplo 3: Sin Token
+### Example 3: No Token
 
 ```gherkin
   Scenario: Missing token should return 401
@@ -182,7 +182,7 @@ Feature: User Authentication
     Then the response should expect 401
 ```
 
-### Ejemplo 4: Acceso Denegado
+### Example 4: Access Denied
 
 ```gherkin
 Feature: Admin Authorization
@@ -196,7 +196,7 @@ Feature: Admin Authorization
     Then the response should access denied
 ```
 
-### Ejemplo 5: Acceso Permitido
+### Example 5: Access Allowed
 
 ```gherkin
   Scenario: Admin token should allow access to admin endpoint
@@ -205,25 +205,31 @@ Feature: Admin Authorization
     Then the response should access allowed
 ```
 
-## Reglas de Sintaxis
+## Syntax Rules
 
-1. **Case-insensitive**: Las keywords pueden escribirse en mayúsculas o minúsculas.
-2. **Espacios**: Los espacios son significativos solo dentro de las frases.
-3. **Comillas**: Los endpoints deben ir entre comillas dobles.
-4. **Orden**: Los pasos deben seguir el orden Given → When → Then.
+1. **Case-insensitive**: Keywords can be written in uppercase or lowercase.
+2. **Spaces**: Spaces are significant only within phrases.
+3. **Quotes**: Endpoints must be enclosed in double quotes.
+4. **Order**: Steps must follow the order Given → When → Then.
 
-## Extensibilidad
+## Extensibility
 
-La sintaxis está diseñada para ser extensible. Futuras versiones pueden agregar:
+The syntax is designed to be extensible. Future versions may add:
 
-- Múltiples headers
-- Métodos HTTP (GET, POST, PUT, DELETE)
-- Validación de body de respuesta
+- Multiple headers
+- HTTP methods (GET, POST, PUT, DELETE)
+- Response body validation
 - Timeouts
-- Múltiples requests en un escenario
+- Multiple requests in a scenario
 
-## Notas de Implementación
+## Implementation Notes
 
-- El parser debe ser tolerante a variaciones menores (espacios extra, mayúsculas/minúsculas)
-- Los endpoints pueden ser relativos o absolutos
-- Los tokens se referencian por nombre, no por valor (el sistema los resuelve internamente)
+- The parser should be tolerant of minor variations (extra spaces, case differences)
+- Endpoints can be relative or absolute
+- Tokens are referenced by name, not by value (the system resolves them internally)
+
+## Related Documentation
+
+- **[DSL Keywords Reference](dsl-keywords-reference.md)** - Quick keyword lookup
+- **[Vhape Framework](README_vhape.md)** - Parser implementation details
+- **[Main README](../README.md)** - Project overview

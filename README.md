@@ -77,13 +77,13 @@ Feature: API Security Validation
     Then the response should validate token
 ```
 
-> 📖 **For complete DSL syntax, keywords, and more examples**, see [`DOCS/dsl-syntax.md`](DOCS/dsl-syntax.md) and [`DOCS/dsl-keywords-reference.md`](DOCS/dsl-keywords-reference.md)
+> 📖 **For complete DSL syntax, keywords, and more examples**, see [`docs/dsl-syntax.md`](docs/dsl-syntax.md) and [`docs/dsl-keywords-reference.md`](docs/dsl-keywords-reference.md)
 
 ---
 
 ## 🛠️ Usage
 
-For detailed usage instructions, including interactive test execution, advanced options, report viewing, configuration, and all available commands, see the complete usage guide in [`DOCS/README_api_dummy.md`](DOCS/README_api_dummy.md).
+For detailed usage instructions, including interactive test execution, advanced options, report viewing, configuration, and all available commands, see the complete usage guide in [`docs/README_api_dummy.md`](docs/README_api_dummy.md).
 
 ---
 
@@ -101,13 +101,13 @@ docker-compose run --rm bjparser python tests/e2e/run_e2e_tests.py --all
 
 ## 📚 Documentation
 
-All detailed documentation is available in the [`DOCS/`](DOCS/) directory:
+All detailed documentation is available in the [`docs/`](docs/) directory:
 
-- **[DSL Syntax & Keywords](DOCS/)** - Complete DSL reference, syntax guide, and keyword lookup
-- **[Vhape Framework](DOCS/README_vhape.md)** - Core framework, parser architecture, and reporting system
-- **[API Dummy](DOCS/README_api_dummy.md)** - Dummy API endpoints, Docker setup, and Postman collections
-- **[Testing Guide](DOCS/README_tests_unit.md)** - Unit tests, E2E tests, and test results documentation
-- **[Project Structure](DOCS/README_vhape.md#module-structure)** - Detailed project organization
+- **[DSL Syntax & Keywords](docs/)** - Complete DSL reference, syntax guide, and keyword lookup
+- **[Vhape Framework](docs/README_vhape.md)** - Core framework, parser architecture, and reporting system
+- **[API Dummy](docs/README_api_dummy.md)** - Dummy API endpoints, Docker setup, and Postman collections
+- **[Testing Guide](docs/README_tests_unit.md)** - Unit tests, E2E tests, and test results documentation
+- **[Project Structure](docs/README_vhape.md#module-structure)** - Detailed project organization
 
 ---
 
@@ -126,7 +126,7 @@ Contributions are welcome! This project was developed for educational purposes, 
 
 ### Development Setup
 
-For local development without Docker, see the detailed setup instructions in [`DOCS/README_vhape.md`](DOCS/README_vhape.md).
+For local development without Docker, see the detailed setup instructions in [`docs/README_vhape.md`](docs/README_vhape.md).
 
 ---
 
@@ -148,7 +148,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - **Issues**: [GitHub Issues](https://github.com/Angel-crypt/vhape-mvp/issues)
-- **Documentation**: See [`DOCS/`](DOCS/) directory for detailed guides
+- **Documentation**: See [`Docs/`](docs/) directory for detailed guides
 - **Questions**: Open an issue for questions or suggestions
 
 ---

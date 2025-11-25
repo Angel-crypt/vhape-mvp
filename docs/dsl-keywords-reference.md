@@ -1,55 +1,53 @@
-# Vhape DSL - Referencia de Keywords
+# Vhape DSL - Keywords Reference
 
-## Resumen de Keywords DSL
+Quick reference guide for all available keywords in the Vhape DSL.
 
-Esta es una referencia rápida de todas las keywords disponibles en el DSL de Vhape.
-
-## Keywords de Contexto (Given)
+## Context Keywords (Given)
 
 ### Tokens
 
-| Keyword | Descripción | Resultado Esperado |
-|---------|-------------|-------------------|
-| `I have a valid token` | Token válido (admin) | Permite acceso |
-| `I have an admin token` | Token con rol admin | Permite acceso admin |
-| `I have a user token` | Token con rol usuario | Permite acceso usuario |
-| `I have an invalid token` | Token inválido | Retorna 401 |
-| `I have no token` | Sin token | Retorna 401 |
-| `I have a missing token` | Token faltante | Retorna 401 |
+| Keyword | Description | Expected Result |
+|---------|-------------|-----------------|
+| `I have a valid token` | Valid token (admin) | Allows access |
+| `I have an admin token` | Token with admin role | Allows admin access |
+| `I have a user token` | Token with user role | Allows user access |
+| `I have an invalid token` | Invalid token | Returns 401 |
+| `I have no token` | No token | Returns 401 |
+| `I have a missing token` | Missing token | Returns 401 |
 
-## Keywords de Acción (When)
+## Action Keywords (When)
 
 ### Request
 
-| Keyword | Formato | Ejemplo |
-|---------|---------|---------|
-| `I send a request to "<endpoint>"` | Endpoint entre comillas | `"/api/users/me"` |
+| Keyword | Format | Example |
+|---------|--------|---------|
+| `I send a request to "<endpoint>"` | Endpoint in quotes | `"/api/users/me"` |
 
-## Keywords de Validación (Then)
+## Validation Keywords (Then)
 
-### Resultados
+### Results
 
-| Keyword | Descripción | Código HTTP Esperado |
-|---------|-------------|---------------------|
-| `validate token` | Token válido | 200 OK |
-| `expect 401` | No autorizado | 401 Unauthorized |
-| `access denied` | Acceso denegado | 403 Forbidden |
-| `access allowed` | Acceso permitido | 200 OK |
+| Keyword | Description | Expected HTTP Code |
+|---------|-------------|-------------------|
+| `validate token` | Valid token | 200 OK |
+| `expect 401` | Unauthorized | 401 Unauthorized |
+| `access denied` | Access denied | 403 Forbidden |
+| `access allowed` | Access allowed | 200 OK |
 
-## Mapeo de Keywords a Endpoints
+## Keyword to Endpoint Mapping
 
-Basado en el API dummy actual:
+Based on the current dummy API:
 
-| DSL Keyword | Endpoint | Caso de Prueba |
-|------------|----------|----------------|
-| `validate token` | `/api/users/me` | Token válido → 200 |
-| `expect 401` | `/api/users/me` | Sin token o token inválido → 401 |
-| `access denied` | `/api/admin/users` | Token usuario en endpoint admin → 403 |
-| `access allowed` | `/api/admin/users` | Token admin en endpoint admin → 200 |
+| DSL Keyword | Endpoint | Test Case |
+|------------|----------|-----------|
+| `validate token` | `/api/users/me` | Valid token → 200 |
+| `expect 401` | `/api/users/me` | No token or invalid token → 401 |
+| `access denied` | `/api/admin/users` | User token in admin endpoint → 403 |
+| `access allowed` | `/api/admin/users` | Admin token in admin endpoint → 200 |
 
-## Ejemplos Rápidos
+## Quick Examples
 
-### Validar Token
+### Validate Token
 
 ```gherkin
 Given I have a valid token
@@ -57,7 +55,7 @@ When I send a request to "/api/users/me"
 Then the response should validate token
 ```
 
-### Esperar 401
+### Expect 401
 
 ```gherkin
 Given I have no token
@@ -65,7 +63,7 @@ When I send a request to "/api/users/me"
 Then the response should expect 401
 ```
 
-### Acceso Denegado
+### Access Denied
 
 ```gherkin
 Given I have a user token
@@ -73,10 +71,17 @@ When I send a request to "/api/admin/users"
 Then the response should access denied
 ```
 
-### Acceso Permitido
+### Access Allowed
 
 ```gherkin
 Given I have an admin token
 When I send a request to "/api/admin/users"
 Then the response should access allowed
 ```
+
+## Related Documentation
+
+- **[DSL Syntax Guide](dsl-syntax.md)** - Complete syntax reference
+- **[Vhape Framework](README_vhape.md)** - Parser implementation
+- **[API Dummy](README_api_dummy.md)** - Endpoint documentation
+- **[Main README](../README.md)** - Project overview
