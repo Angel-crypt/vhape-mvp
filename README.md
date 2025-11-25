@@ -103,7 +103,8 @@ docker-compose run --rm bjparser python tests/e2e/run_e2e_tests.py --all
 
 All detailed documentation is available in the [`docs/`](docs/) directory:
 
-- **[DSL Syntax & Keywords](docs/)** - Complete DSL reference, syntax guide, and keyword lookup
+- **[DSL Syntax](docs/dsl-syntax.md)** - Complete DSL reference, syntax guide
+- - **[DSL Keywords](docs/dsl-keywords-reference.md)** - Complete DSL keyword lookup
 - **[Vhape Framework](docs/README_vhape.md)** - Core framework, parser architecture, and reporting system
 - **[API Dummy](docs/README_api_dummy.md)** - Dummy API endpoints, Docker setup, and Postman collections
 - **[Testing Guide](docs/README_tests_unit.md)** - Unit tests, E2E tests, and test results documentation
