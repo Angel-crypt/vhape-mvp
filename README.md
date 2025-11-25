@@ -41,38 +41,31 @@
 ### Run with Docker
 
 ```bash
-# 1. Clone the repository
+# Clone and navigate
 git clone https://github.com/Angel-crypt/vhape-mvp.git
 cd vhape-mvp
 
-# 2. Build and start services
+# Build and start services
 docker-compose up -d
 
-# 3. Run tests
+# Run all tests
 docker-compose run --rm bjparser python tests/e2e/run_e2e_tests.py --all
 ```
 
-**Test Flow:**
+**Test Execution Flow:**
 
 ```text
-┌─────────────┐         ┌─────────────┐         ┌─────────────┐
-│ api_dummy   │────────▶│  bjparser   │────────▶│   Reports   │
-│  (Port 8000)│  HTTP   │  (Test      │  Test   │  (HTML/JSON)│
-│             │ Requests│   Runner)   │ Results │             │
-└─────────────┘         └─────────────┘         └─────────────┘
-     ▲                          │
-     │                          │
-     └──────────────────────────┘
-        Validates API Security
+┌─────────────┐    HTTP     ┌─────────────┐    Test     ┌─────────────┐
+│ api_dummy   │────────────▶│  bjparser   │────────────▶│   Reports   │
+│  :8000      │  Requests   │  (Runner)   │   Results   │ HTML / JSON │
+└─────────────┘             └─────────────┘             └─────────────┘
+      ▲                            │
+      │                            │
+      └────────────────────────────┘
+         Security Validation Tests
 ```
 
-**What happens:**
-
-- `api_dummy` service starts on port `8000` (test API server)
-- `bjparser` service runs E2E tests against the API
-- HTML and JSON reports are generated in `./tests/results/`
-
-> 📖 **For detailed Docker setup and troubleshooting**, see [`DOCS/README_api_dummy.md`](DOCS/README_api_dummy.md)
+*The `bjparser` service executes BDD scenarios against `api_dummy`, generating interactive reports in `./tests/results/`.*
 
 ### Example Test Scenario
 
@@ -90,39 +83,7 @@ Feature: API Security Validation
 
 ## 🛠️ Usage
 
-### Running Tests
-
-```bash
-# Interactive mode (select features from menu)
-docker-compose run --rm bjparser python tests/e2e/run_e2e_tests.py
-
-# Run all features
-docker-compose run --rm bjparser python tests/e2e/run_e2e_tests.py --all
-
-# Run specific features
-docker-compose run --rm bjparser python tests/e2e/run_e2e_tests.py --features auth,api_security
-
-# Direct Behave execution
-docker-compose run --rm bjparser behave features/
-```
-
-### Viewing Reports
-
-After running tests, reports are available in `./tests/results/`:
-
-- **HTML Reports**: Open `summary_YYYYMMDD_HHMMSS.html` in your browser
-- **JSON Reports**: Use `summary_YYYYMMDD_HHMMSS.json` for CI/CD integration
-
-Reports automatically open in your default browser when generated.
-
-### Configuration
-
-Set the API URL via environment variable:
-
-```bash
-# In docker-compose.yml or .env file
-VHAPE_API_URL=http://api_dummy:8000
-```
+For detailed usage instructions, including interactive test execution, advanced options, report viewing, configuration, and all available commands, see the complete usage guide in [`DOCS/README_api_dummy.md`](DOCS/README_api_dummy.md).
 
 ---
 
@@ -191,9 +152,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Questions**: Open an issue for questions or suggestions
 
 ---
-
-## 💝 Made with ❤️
-
-Made with ❤️ for developers who care about API security.
 
 [⬆ Back to Top](#vhape)
