@@ -13,6 +13,7 @@ from behave.model import Scenario, Feature, Step
 from vhape.reporting.summary import TestSummary
 
 
+
 # Global test summary instance
 test_summary = TestSummary()
 
@@ -27,8 +28,7 @@ def before_all(context):
     sys.stdout.write(f"\n{'='*60}\n")
     sys.stdout.write(f"  VHAPE - API Security Validation\n")
     sys.stdout.write(f"{'='*60}\n")
-    sys.stdout.write(f"\n🔍 Verifying API server accessibility at {api_url}...\n")
-    sys.stdout.flush()
+    print(f"\n[INFO] Verifying API server accessibility at {api_url}...")
     
     context.api_url = api_url
     
@@ -38,19 +38,16 @@ def before_all(context):
     try:
         response = requests.get(f"{api_url}/api/health", timeout=5)
         if response.status_code == 200 and response.json().get("status") == "healthy":
-            sys.stdout.write("✅ API server is running and healthy.\n\n")
-            sys.stdout.flush()
+            print("[OK] API server is running and healthy.\n")
         else:
             raise ConnectionError(f"API health check failed: {response.status_code} - {response.text}")
     except requests.exceptions.ConnectionError as e:
-        sys.stdout.write(f"❌ API server is not running or unreachable. Error: {e}\n")
-        sys.stdout.write("   Please ensure the API dummy server is running.\n")
-        sys.stdout.write("   Start it with: ./api_dummy/run.sh\n\n")
-        sys.stdout.flush()
+        print(f"[FAIL] API server is not running or unreachable. Error: {e}")
+        print("   Please ensure the API dummy server is running.")
+        print("   Start it with: ./api_dummy/run.sh\n")
         exit(1)  # Exit Behave if API is not running
     except Exception as e:
-        sys.stdout.write(f"❌ An unexpected error occurred during API health check: {e}\n\n")
-        sys.stdout.flush()
+        print(f"[FAIL] An unexpected error occurred during API health check: {e}\n")
         exit(1)
 
 
@@ -104,8 +101,7 @@ def after_all(context):
     # Debug: Check security issues before finalizing
     num_issues = len(context.test_summary.security_issues)
     if num_issues > 0:
-        sys.stdout.write(f"\n🔍 Debug: Found {num_issues} security issues before finalizing\n")
-        sys.stdout.flush()
+        print(f"\n[INFO] Debug: Found {num_issues} security issues before finalizing")
     
     context.test_summary.finalize()
     
@@ -119,10 +115,8 @@ def after_all(context):
     results_dir = Path('tests/results')
     results_dir.mkdir(parents=True, exist_ok=True)
     json_file = context.test_summary.save_json()
-    sys.stdout.write(f"💾 Summary saved to: {json_file}\n\n")
-    sys.stdout.flush()
+    print(f"[SAVE] Summary saved to: {json_file}\n")
     
     # Debug: Verify security issues after saving
     if num_issues > 0:
-        sys.stdout.write(f"🔍 Debug: Saved {len(context.test_summary.security_issues)} security issues to JSON\n")
-        sys.stdout.flush()
+        print(f"[INFO] Debug: Saved {len(context.test_summary.security_issues)} security issues to JSON")

@@ -7,13 +7,45 @@ Generates clear, understandable summaries of test execution.
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
+import time
 
 
 class TestSummary:
     """Generates summary reports for test execution."""
     
+    @staticmethod
+    def _get_local_datetime():
+        """
+        Get current datetime in local timezone.
+        
+        Returns a naive datetime object representing the current local time.
+        This ensures timestamps are saved and interpreted as local time,
+        not UTC or any other timezone.
+        
+        Uses time.localtime() to explicitly get local time, avoiding any
+        timezone configuration issues that might cause datetime.now() to
+        return UTC instead of local time.
+        """
+        # Use time.localtime() to explicitly get local time
+        # This ensures we always get the correct local time, even if
+        # the system is configured to use UTC or another timezone
+        local_time = time.localtime()
+        # Get microseconds from time.time() for precision
+        current_time = time.time()
+        microseconds = int((current_time - int(current_time)) * 1000000)
+        
+        return datetime(
+            local_time.tm_year,
+            local_time.tm_mon,
+            local_time.tm_mday,
+            local_time.tm_hour,
+            local_time.tm_min,
+            local_time.tm_sec,
+            microseconds
+        )
+    
     def __init__(self):
-        self.start_time = datetime.now()
+        self.start_time = self._get_local_datetime()
         self.end_time = None
         self.features = []
         self.scenarios = []
@@ -25,7 +57,7 @@ class TestSummary:
         self.features.append({
             'name': feature_name,
             'status': status,
-            'timestamp': datetime.now()
+            'timestamp': self._get_local_datetime()
         })
     
     def add_scenario(self, scenario_name: str, status: str, feature_name: str):
@@ -34,7 +66,7 @@ class TestSummary:
             'name': scenario_name,
             'status': status,
             'feature': feature_name,
-            'timestamp': datetime.now()
+            'timestamp': self._get_local_datetime()
         })
     
     def add_step(self, step_name: str, status: str, error: Optional[str] = None):
@@ -43,7 +75,7 @@ class TestSummary:
             'name': step_name,
             'status': status,
             'error': error,
-            'timestamp': datetime.now()
+            'timestamp': self._get_local_datetime()
         })
     
     def add_security_issue(self, message: str, step_name: str, severity: str = 'high'):
@@ -52,12 +84,12 @@ class TestSummary:
             'message': message,
             'step': step_name,
             'severity': severity,
-            'timestamp': datetime.now()
+            'timestamp': self._get_local_datetime()
         })
     
     def finalize(self):
         """Finalize the summary with end time."""
-        self.end_time = datetime.now()
+        self.end_time = self._get_local_datetime()
     
     def get_statistics(self) -> Dict:
         """Get summary statistics."""
@@ -107,36 +139,36 @@ class TestSummary:
         print("=" * 60)
         
         # Features
-        print(f"\n📋 Features:")
+        print(f"\nFeatures:")
         print(f"   Total:    {stats['features']['total']}")
-        print(f"   ✅ Passed: {stats['features']['passed']}")
-        print(f"   ❌ Failed: {stats['features']['failed']}")
+        print(f"   [OK] Passed: {stats['features']['passed']}")
+        print(f"   [FAIL] Failed: {stats['features']['failed']}")
         
         # Scenarios
-        print(f"\n🎯 Scenarios:")
+        print(f"\nScenarios:")
         print(f"   Total:    {stats['scenarios']['total']}")
-        print(f"   ✅ Passed: {stats['scenarios']['passed']}")
-        print(f"   ❌ Failed: {stats['scenarios']['failed']}")
+        print(f"   [OK] Passed: {stats['scenarios']['passed']}")
+        print(f"   [FAIL] Failed: {stats['scenarios']['failed']}")
         
         # Steps
-        print(f"\n📝 Steps:")
+        print(f"\nSteps:")
         print(f"   Total:    {stats['steps']['total']}")
-        print(f"   ✅ Passed: {stats['steps']['passed']}")
-        print(f"   ❌ Failed: {stats['steps']['failed']}")
+        print(f"   [OK] Passed: {stats['steps']['passed']}")
+        print(f"   [FAIL] Failed: {stats['steps']['failed']}")
         
         # Security Issues
         if stats['security_issues'] > 0:
-            print(f"\n⚠️  Security Issues Found: {stats['security_issues']}")
+            print(f"\n[WARN] Security Issues Found: {stats['security_issues']}")
             for issue in self.security_issues:
-                print(f"   ❌ {issue['message']} (Step: {issue['step']})")
+                print(f"   [FAIL] {issue['message']} (Step: {issue['step']})")
         else:
-            print(f"\n✅ No security issues detected")
+            print(f"\n[OK] No security issues detected")
         
         # Success Rate
-        print(f"\n📊 Success Rate: {stats['success_rate']:.1f}%")
+        print(f"\nSuccess Rate: {stats['success_rate']:.1f}%")
         
         # Duration
-        print(f"\n⏱️  Duration: {stats['duration']:.2f}s")
+        print(f"\nDuration: {stats['duration']:.2f}s")
         
         print("\n" + "=" * 60 + "\n")
     
@@ -145,10 +177,19 @@ class TestSummary:
         import json
         
         if filepath is None:
-            filepath = Path('tests/results') / f"summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            # Use local time for filename to match the actual execution time
+            filepath = Path('tests/results') / f"summary_{self._get_local_datetime().strftime('%Y%m%d_%H%M%S')}.json"
         
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Helper function to serialize datetime objects
+        def serialize_datetime(obj):
+            """Serialize datetime objects to ISO format strings."""
+            if isinstance(obj, datetime):
+                # Save as ISO format (naive datetime, assumed to be local time)
+                return obj.isoformat()
+            raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
         
         data = {
             'start_time': self.start_time.isoformat(),
@@ -160,7 +201,7 @@ class TestSummary:
         }
         
         with open(filepath, 'w') as f:
-            json.dump(data, f, indent=2, default=str)
+            json.dump(data, f, indent=2, default=serialize_datetime)
         
         return filepath
 

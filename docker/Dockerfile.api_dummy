@@ -1,0 +1,35 @@
+# ============================================
+# Dockerfile for Vhape API Dummy Service
+# ============================================
+# This container runs the FastAPI dummy API server
+# used for testing DSL keywords in the Vhape BDD framework.
+
+# Base image: Python 3.11 slim (minimal size)
+FROM python:3.11-slim
+
+# Install curl and tzdata for timezone support
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory inside container
+WORKDIR /app
+
+# Install dependencies from api_dummy/requirements.txt
+# Copy requirements first for better Docker layer caching
+COPY api_dummy/requirements.txt /app/api_dummy/requirements.txt
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r /app/api_dummy/requirements.txt
+
+# Copy the entire api_dummy directory into /app/api_dummy
+COPY api_dummy/ /app/api_dummy/
+
+# Expose port 8000 for the FastAPI server
+EXPOSE 8000
+
+# Default command: run uvicorn server
+# Host 0.0.0.0 allows external connections
+CMD ["uvicorn", "api_dummy.main:app", "--host", "0.0.0.0", "--port", "8000"]
+

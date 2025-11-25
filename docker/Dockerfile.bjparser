@@ -1,0 +1,53 @@
+# ============================================
+# Dockerfile for Vhape Parser + Behave Runner
+# ============================================
+# This container runs the Vhape BDD parser and test execution engine.
+# It includes the parser, reporting system, and behave framework.
+
+# Base image: Python 3.11 slim (minimal size)
+FROM python:3.11-slim
+
+# Install curl and tzdata for timezone support
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory inside container
+WORKDIR /app
+
+# Install dependencies from root requirements.txt
+# Copy requirements first for better Docker layer caching
+COPY requirements.txt /app/requirements.txt
+
+# Install Python dependencies (behave, lark, requests, jinja2, etc.)
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# Copy the entire repository into /app
+# This includes: vhape/, features/, tests/, api_dummy/, etc.
+COPY . /app/
+
+# Copy and set up entrypoint script
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# Make entrypoint script executable
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Set default environment variables
+# VHAPE_API_URL: URL of the API dummy service (default: http://api_dummy:8000)
+ENV VHAPE_API_URL=http://api_dummy:8000
+
+# RESULTS_DIR: Directory where test results will be stored
+ENV RESULTS_DIR=/app/tests/results
+
+# Set timezone (will be overridden by docker-compose to match host)
+# Default to UTC, but docker-compose will set it to match host timezone
+ENV TZ=UTC
+
+# Define volume for test results (allows persistence outside container)
+VOLUME ["/app/tests/results"]
+
+# Set entrypoint to our custom script
+# This script will wait for API, create directories, and handle commands
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+

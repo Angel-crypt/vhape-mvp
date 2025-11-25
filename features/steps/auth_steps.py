@@ -6,9 +6,11 @@ HTTP requests to the dummy API, then validate the responses.
 """
 
 import os
+import sys
 import requests
 from behave import given, when, then, step
 from vhape.parser import parse_step, DSLParseError
+
 
 
 # API base URL - can be configured via environment variable
@@ -177,12 +179,12 @@ def step_then_validate(context, validation_description):
             if context.response_status == 200:
                 assert 'user_id' in context.response_data or 'message' in context.response_data, \
                     "Response should contain user information"
-                security_message = "✅ Access correctly granted (secure)"
+                security_message = "[OK] Access correctly granted (secure)"
                 security_status = 'secure'
             else:
                 # Security issue: token validation failed when it should have passed
                 # This could indicate the token is invalid when it should be valid
-                security_message = f"❌ Token validation failed (insecure) - Expected 200 OK for validate_token, got {context.response_status}"
+                security_message = f"[FAIL] Token validation failed (insecure) - Expected 200 OK for validate_token, got {context.response_status}"
                 security_status = 'insecure'
                 if hasattr(context, 'test_summary'):
                     context.test_summary.add_security_issue(
@@ -196,11 +198,11 @@ def step_then_validate(context, validation_description):
             if context.response_status == 401:
                 assert 'detail' in context.response_data, \
                     "Response should contain error detail"
-                security_message = "✅ Access correctly denied (secure)"
+                security_message = "[OK] Access correctly denied (secure)"
                 security_status = 'secure'
             else:
                 # Security issue: unauthorized access was allowed
-                security_message = f"❌ Unauthorized access allowed (insecure) - Expected 401, got {context.response_status}"
+                security_message = f"[FAIL] Unauthorized access allowed (insecure) - Expected 401, got {context.response_status}"
                 security_status = 'insecure'
                 if hasattr(context, 'test_summary'):
                     context.test_summary.add_security_issue(
@@ -216,11 +218,11 @@ def step_then_validate(context, validation_description):
                     "Response should contain error detail"
                 assert 'Access denied' in context.response_data.get('detail', ''), \
                     "Response detail should mention access denied"
-                security_message = "✅ Access correctly denied (secure)"
+                security_message = "[OK] Access correctly denied (secure)"
                 security_status = 'secure'
             else:
                 # Security issue: access should have been denied
-                security_message = f"❌ Unauthorized access allowed (insecure) - Expected 403, got {context.response_status}"
+                security_message = f"[FAIL] Unauthorized access allowed (insecure) - Expected 403, got {context.response_status}"
                 security_status = 'insecure'
                 if hasattr(context, 'test_summary'):
                     context.test_summary.add_security_issue(
@@ -237,12 +239,12 @@ def step_then_validate(context, validation_description):
                         'status' in context.response_data or
                         'user_id' in context.response_data), \
                     "Response should contain data (users, message, status, or user_id)"
-                security_message = "✅ Access correctly granted (secure)"
+                security_message = "[OK] Access correctly granted (secure)"
                 security_status = 'secure'
             else:
                 # Security issue: access was denied when it should have been allowed
                 # This could indicate insufficient permissions or authentication issues
-                security_message = f"❌ Access denied when it should be allowed (insecure) - Expected 200 OK for access_allowed, got {context.response_status}"
+                security_message = f"[FAIL] Access denied when it should be allowed (insecure) - Expected 200 OK for access_allowed, got {context.response_status}"
                 security_status = 'insecure'
                 if hasattr(context, 'test_summary'):
                     context.test_summary.add_security_issue(

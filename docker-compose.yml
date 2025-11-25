@@ -1,0 +1,51 @@
+services:
+  # API Dummy Service
+  # FastAPI server for testing DSL keywords
+  api_dummy:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api_dummy
+    container_name: api_dummy
+    ports:
+      - "8000:8000"
+    environment:
+      # Set timezone to match host (Central Standard Time Mexico = America/Mexico_City)
+      - TZ=America/Mexico_City
+    networks:
+      - vhape-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Vhape Parser + Behave Runner
+  # BDD test execution engine
+  bjparser:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.bjparser
+    container_name: bjparser
+    depends_on:
+      - api_dummy
+    environment:
+      - VHAPE_API_URL=http://api_dummy:8000
+      - RESULTS_DIR=/app/tests/results
+      # Set timezone to match host (Central Standard Time Mexico = America/Mexico_City)
+      - TZ=America/Mexico_City
+    volumes:
+      # Mount results directory for persistence
+      - ./tests/results:/app/tests/results
+      # Mount entire project for development (optional, can be removed for production)
+      - ./:/app
+    networks:
+      - vhape-net
+    # Enable interactive mode
+    tty: true
+    stdin_open: true
+
+networks:
+  vhape-net:
+    driver: bridge
+
